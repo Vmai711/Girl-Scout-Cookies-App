@@ -16,6 +16,6 @@ jobs:
 
     - uses: FirebaseExtended/action-hosting-deploy@v0
       with:
-        repoToken: '${{ secrets.GITHUB_TOKEN }}'
+        repoToken: '${{ secrets.FIREBASE_TOKEN}}'
         firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIRL_SCOUT_COOKIES_APP}}'
         projectId: "girl-scout-cookies-app"
