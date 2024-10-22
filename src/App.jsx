@@ -1,5 +1,5 @@
 import React from 'react';
-import { auth } from "./firebase/firebase";
+import { auth } from './firebase/auth';
 import { initializeApp } from './firebase/firebase';
 
 const App = () => {

@@ -1,4 +1,4 @@
-import { auth } from "./firebase";
+import { getAuth } from "firebase/auth";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,6 +8,9 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
+
+const auth = getAuth();
+export { auth };
 
 export const doCreateUserWithEmailAndPassword = async (email, password) => {
   return createUserWithEmailAndPassword(auth, email, password);
