@@ -3,17 +3,15 @@
     "firebase": "^10.13.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
+    "react-scripts": "^5.0.1"
   },
   "name": "girl-scout-cookies-app",
   "description": "CSE4416 Senior Design 1",
   "version": "1.0.0",
   "main": "firebase_config.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "scripts": {
-  "build": "react-scripts build",
-  "start": "react-scripts start"
+    "build": "react-scripts build",
+    "start": "react-scripts start"
   },
   "keywords": [],
   "author": "",
