@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    
-    - run: npm install # Set up dependencies if needed
+        - uses: actions/setup-node@v3
+          with:
+            node-version: '20'
+      
+    - run: npm install
 
     - run: npm run build
 
