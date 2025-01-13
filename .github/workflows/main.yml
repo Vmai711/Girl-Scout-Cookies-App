@@ -1,0 +1,28 @@
+name: Deploy to Firebase Hosting on merge
+
+'on':
+  push:
+    branches:
+      - main 
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - uses: actions/checkout@v2
+      
+    - run: npm install
+
+    - run: npm run build
+
+    - uses: FirebaseExtended/action-hosting-deploy@v0
+      with:
+        repoToken: '${{ secrets.FIREBASE_TOKEN}}'
+        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIRL_SCOUT_COOKIES_APP}}'
+        projectId: "girl-scout-cookies-app"
+        channelId: "live"
