@@ -5,9 +5,12 @@ import Header from "./components/header";
 import Home from "./components/home";
 
 import OrderManagement from "./components/dashboard/order_management";
-import Customers from "./components/dashboard/customers"; 
 import Transactions from "./components/dashboard/transactions";
 import Dashboard from "./components/dashboard/dashboard"; 
+import Prizes from "./components/dashboard/prizes";
+import Troops from "./components/dashboard/troops";
+import Cookies from "./components/dashboard/cookies";
+import Messages from "./components/dashboard/messages";
 
 import { AuthProvider } from "./contexts/authContext";
 import { useRoutes } from "react-router-dom";
@@ -21,8 +24,11 @@ function App() {
     { path: "/home", element: <Home /> },
     { path: "/dashboard", element: <Dashboard /> },
     { path: "/order-management", element: <OrderManagement /> },
-    { path: "/customers", element: <Customers /> },
+    { path: "/troops", element: <Troops /> },
     { path: "/transactions", element: <Transactions /> },
+    { path: "/cookies", element: <Cookies /> },
+    { path: "/messages", element: <Messages /> },
+    { path: "/prizes", element: <Prizes /> },
   ];
   
   let routesElement = useRoutes(routesArray);

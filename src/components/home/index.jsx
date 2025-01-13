@@ -25,7 +25,7 @@ const Home = () => {
         to="/dashboard" 
         className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
-        Dashboard Page
+          Dashboard Page
         </Link>
 
         <Link
@@ -36,10 +36,10 @@ const Home = () => {
         </Link>
 
         <Link
-          to="/customers"
+          to="/troops"
           className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
-          Customer Page
+          Troops Page
         </Link>
 
         <Link
@@ -47,6 +47,27 @@ const Home = () => {
           className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
           Transaction Page
+        </Link>
+
+        <Link
+          to="/cookies"
+          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
+        >
+          Cookies Page
+        </Link>
+
+        <Link
+          to="/messages"
+          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
+        >
+          Message Page
+        </Link>
+
+        <Link
+          to="/prizes"
+          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
+        >
+          Rewards Page
         </Link>
 
       </div>
