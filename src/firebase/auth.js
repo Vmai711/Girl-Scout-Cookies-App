@@ -15,23 +15,18 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 // };
 
 export const doCreateUserWithEmailAndPassword = async (email, password, role) => {
-  try {
-    // Create user with email and password
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
 
-    // Save user role to Firestore
-    await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
-      role: role,
-      createdAt: new Date(),
-    });
+  // Store user data in Firestore
+  await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email,
+      role, // Store role in Firestore
+      createdAt: new Date()
+  });
 
-    return user;
-  } catch (error) {
-    console.error("Error creating user:", error);
-    throw error; 
-  }
+  return user;
 };
 
 
@@ -41,7 +36,7 @@ export const doSignInWithEmailAndPassword = (email, password) => {
 
 export const doSignInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
-  
+
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
@@ -53,11 +48,14 @@ export const doSignInWithGoogle = async () => {
     // If user does not exist in Firestore, add them with default role
     if (!userDoc.exists()) {
       await setDoc(userDocRef, {
+        uid: user.uid, 
         email: user.email,
         role: "Parent/Scout", // Default role
-        createdAt: new Date(),
+        createdAt: new Date(), 
       });
     }
+
+    return user; 
   } catch (error) {
     console.error("Error during Google Sign-In:", error);
     throw error; 

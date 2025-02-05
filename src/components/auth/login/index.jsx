@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../../firebase/auth'
 import { useAuth } from '../../../contexts/authContext'
+import { db } from '../../../firebase/firebase'; // Firestore reference
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const Login = () => {
     const { userLoggedIn } = useAuth()
@@ -10,6 +12,8 @@ const Login = () => {
     const [password, setPassword] = useState('')
     const [isSigningIn, setIsSigningIn] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+
+    const navigate = useNavigate();
 
     const onSubmit = async (e) => {
         e.preventDefault()
@@ -35,19 +39,38 @@ const Login = () => {
     }
 
     const onGoogleSignIn = async (e) => {
-        e.preventDefault()
-        setErrorMessage('') // Clear previous error messages
+        e.preventDefault();
+        setErrorMessage(''); // Clear previous error messages
         if (!isSigningIn) {
-            setIsSigningIn(true)
+            setIsSigningIn(true);
             try {
-                await doSignInWithGoogle()
+                const userCredential = await doSignInWithGoogle();
+                const user = userCredential.user;
+    
+                // Check Firestore if user already has a role
+                const userRef = doc(db, 'users', user.uid);
+                const userSnap = await getDoc(userRef);
+    
+                if (userSnap.exists() && userSnap.data().role) {
+                    // User has a role, redirect to home
+                    navigate('/home');
+                } else {
+                    // User is new or has no role, save basic data & redirect to role selection
+                    await setDoc(userRef, {
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        role: '' // Empty role, will be set in GoogleRoleSelection
+                    }, { merge: true });
+    
+                    navigate('/select-role');
+                }
             } catch (error) {
-                setIsSigningIn(false)
-                // Handle Google Sign-In specific errors if needed
-                setErrorMessage('Google sign-in failed. Please try again.')
+                setIsSigningIn(false);
+                setErrorMessage('Google sign-in failed. Please try again.');
             }
         }
-    }
+    };
 
     return (
         <div>
