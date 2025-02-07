@@ -2,9 +2,7 @@ import React from "react";
 import { useAuth } from "../../contexts/authContext";
 import { Link } from "react-router-dom";
 
-const Home = () => {
-  const { currentUser } = useAuth();
-
+const TroopLeader = () => {
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <div
@@ -17,7 +15,7 @@ const Home = () => {
           logged in.
         </h1>
         <p className="text-sm text-gray-600 mb-4">
-          This is the Test Home Page. More Stuff will be included.
+          This is the Troop Leader Test Home Page. More Stuff will be included.
         </p>
         <p className="text-sm text-gray-600 mb-4">Working links:</p>
 
@@ -36,7 +34,7 @@ const Home = () => {
         </Link>
 
         <Link
-        to="/trooperleader" 
+        to="/troopleader" 
         className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
           Troop Leader Page
@@ -96,4 +94,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default TroopLeader;
