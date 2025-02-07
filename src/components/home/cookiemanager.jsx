@@ -3,6 +3,8 @@ import { useAuth } from "../../contexts/authContext";
 import { Link } from "react-router-dom";
 
 const CookieManager = () => {
+  const { currentUser } = useAuth();
+  
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <div
@@ -18,27 +20,6 @@ const CookieManager = () => {
           This is the Cookie Manager Test Home Page. More Stuff will be included.
         </p>
         <p className="text-sm text-gray-600 mb-4">Working links:</p>
-
-        <Link
-        to="/parentscout" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Parent/Scout Page
-        </Link>
-
-        <Link
-        to="/cookiemanager" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Cookie Manager Page
-        </Link>
-
-        <Link
-        to="/troopleader" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Troop Leader Page
-        </Link>
 
         <Link
         to="/dashboard" 

@@ -36,12 +36,12 @@ const Home = () => {
         </Link>
 
         <Link
-        to="/trooperleader" 
+        to="/troopleader" 
         className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
           Troop Leader Page
         </Link>
-
+{/*
         <Link
         to="/dashboard" 
         className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
@@ -90,6 +90,7 @@ const Home = () => {
         >
           Rewards Page
         </Link>
+*/}
 
       </div>
     </div>
