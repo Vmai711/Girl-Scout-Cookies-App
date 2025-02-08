@@ -92,6 +92,14 @@ const Home = () => {
         </Link>
 */}
 
+        <Link
+          to="/order_form"
+          className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600"
+        >
+          Order Girl Scout Cookies
+        </Link>
+
+
       </div>
     </div>
   );

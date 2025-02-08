@@ -1,5 +1,6 @@
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
+import GoogleRoleSelection from './components/auth/register/GoogleRoleSelection';
 
 import Header from "./components/header";
 import Home from "./components/home";
@@ -14,6 +15,7 @@ import Prizes from "./components/dashboard/prizes";
 import Troops from "./components/dashboard/troops";
 import Cookies from "./components/dashboard/cookies";
 import Messages from "./components/dashboard/messages";
+import Order from "./components/order_form/order_form";
 
 import { AuthProvider } from "./contexts/authContext";
 import { useRoutes } from "react-router-dom";
@@ -35,6 +37,8 @@ function App() {
     { path: "/cookies", element: <Cookies /> },
     { path: "/messages", element: <Messages /> },
     { path: "/prizes", element: <Prizes /> },
+    { path: "/select-role", element: <GoogleRoleSelection /> },
+    { path: "/order_form", element: <Order /> },
   ];
   
   let routesElement = useRoutes(routesArray);
