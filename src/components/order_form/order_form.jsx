@@ -37,7 +37,8 @@ const Order = () => {
             numCookies,
             pickupLocation,
             contactMethod,
-            acceptedResponsibility
+            acceptedResponsibility,
+            timestamp: new Date()
         };
 
         try {
