@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "test-site-be97a",
+    "site": "girl-scout-cookies-app",
     "public": "build",
     "ignore": [
       "firebase.json",

@@ -4,6 +4,9 @@ import GoogleRoleSelection from './components/auth/register/GoogleRoleSelection'
 
 import Header from "./components/header";
 import Home from "./components/home";
+import ParentScout from "./components/home/parentscout";
+import CookieManager from "./components/home/cookiemanager";
+import TroopLeader from "./components/home/troopleader";
 
 import OrderManagement from "./components/dashboard/order_management";
 import Transactions from "./components/dashboard/transactions";
@@ -21,6 +24,9 @@ import { useRoutes } from "react-router-dom";
 function App() {
   const routesArray = [
     { path: "*", element: <Login /> },
+    { path: "/parentscout", element: <ParentScout /> },
+    { path: "/cookiemanager", element: <CookieManager /> },
+    { path: "/troopleader", element: <TroopLeader /> },
     { path: "/login", element: <Login /> },
     { path: "/register", element: <Register /> },
     { path: "/home", element: <Home /> },

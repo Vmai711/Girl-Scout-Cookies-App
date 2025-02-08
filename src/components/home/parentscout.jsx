@@ -2,9 +2,9 @@ import React from "react";
 import { useAuth } from "../../contexts/authContext";
 import { Link } from "react-router-dom";
 
-const Home = () => {
+const ParentScout = () => {
   const { currentUser } = useAuth();
-
+  
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <div
@@ -17,31 +17,10 @@ const Home = () => {
           logged in.
         </h1>
         <p className="text-sm text-gray-600 mb-4">
-          This is the Test Home Page. More Stuff will be included.
+          This is the Parent/Scout Test Home Page. More Stuff will be included.
         </p>
         <p className="text-sm text-gray-600 mb-4">Working links:</p>
 
-        <Link
-        to="/parentscout" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Parent/Scout Page
-        </Link>
-
-        <Link
-        to="/cookiemanager" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Cookie Manager Page
-        </Link>
-
-        <Link
-        to="/troopleader" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Troop Leader Page
-        </Link>
-{/*
         <Link
         to="/dashboard" 
         className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
@@ -90,19 +69,10 @@ const Home = () => {
         >
           Rewards Page
         </Link>
-*/}
-
-        <Link
-          to="/order_form"
-          className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600"
-        >
-          Order Girl Scout Cookies
-        </Link>
-
 
       </div>
     </div>
   );
 };
 
-export default Home;
+export default ParentScout;
