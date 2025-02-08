@@ -40,11 +40,17 @@ const Order = () => {
             acceptedResponsibility
         };
 
-        console.log("Order Submitted:", orderData);
-        alert("Order submitted successfully!");
-
-        // TODO: Send orderData to Firestore 
-
+        try {
+            const orderId = await saveOrder(orderData);  // Save to Firestore
+            alert(`Order submitted successfully! Your Order ID is: ${orderId}`);
+            
+            // Redirect only if the order is successfully submitted
+            navigate('/home');
+        } catch (error) {
+            console.error("Error submitting order:", error);
+            alert("There was an error submitting your order. Please try again.");
+            // Stay on the page by not calling `navigate`
+        }
         // Redirect to home page
         navigate('/home');
     };
