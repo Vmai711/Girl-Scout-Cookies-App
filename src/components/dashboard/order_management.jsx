@@ -4,8 +4,9 @@ import { useNavigate } from "react-router-dom";
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
 
+  //Fetch orders from firestore
   useEffect(() => {
     const getOrders = async () => {
       try {
@@ -24,6 +25,7 @@ const OrderManagement = () => {
       <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
         <h1 className="text-2xl font-bold mb-4">Order Management</h1>
 
+        {/* Display orders or a message if no orders exist */}
         {orders.length === 0 ? (
           <p>No orders found.</p>
         ) : (

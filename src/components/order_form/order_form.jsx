@@ -5,9 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { saveOrder } from '../../firebase/firestore';
 
 const Order = () => {
-    const { currentUser } = useAuth(); // Get logged-in user's email
     const navigate = useNavigate();
 
+    // Get logged-in user's email
+    const { currentUser } = useAuth(); 
+    
     const [girlName, setGirlName] = useState('');
     const [parentName, setParentName] = useState('');
     const [cookieSelection, setCookieSelection] = useState('');
@@ -16,6 +18,7 @@ const Order = () => {
     const [contactMethod, setContactMethod] = useState('');
     const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
 
+    //Rename these to actual cookie names and add/delete as needed
     const cookieOptions = [
         'Cookies1', 'Cookies2', 'Cookies3', 'Cookies4', 'Cookies5',
         'Cookies6', 'Cookies7', 'Cookies8', 'Cookies9', 'Cookies10'
@@ -29,6 +32,7 @@ const Order = () => {
             return;
         }
 
+        //Data that will be sent to the firebase collections database
         const orderData = {
             email: currentUser?.email || '',
             girlName,
@@ -42,15 +46,15 @@ const Order = () => {
         };
 
         try {
-            const orderId = await saveOrder(orderData);  // Save to Firestore
+            const orderId = await saveOrder(orderData);  
             alert(`Order submitted successfully! Your Order ID is: ${orderId}`);
             
             // Redirect only if the order is successfully submitted
             navigate('/home');
         } catch (error) {
+            // Stay on the page by not calling `navigate`
             console.error("Error submitting order:", error);
             alert("There was an error submitting your order. Please try again.");
-            // Stay on the page by not calling `navigate`
         }
         // Redirect to home page
         navigate('/home');
