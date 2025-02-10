@@ -67,7 +67,7 @@ const TroopLeader = () => {
           to="/prizes"
           className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
-          Rewardsss Page
+          Rewards Page
         </Link>
 
         <Link
