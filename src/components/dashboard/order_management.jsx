@@ -4,14 +4,18 @@ import { useNavigate } from "react-router-dom";
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const navigate = useNavigate(); 
 
-  //Fetch orders from firestore
+  // Fetch orders from Firestore
   useEffect(() => {
     const getOrders = async () => {
       try {
         const orderList = await fetchOrders();
         setOrders(orderList);
+        setFilteredOrders(orderList); // Initially, show all orders
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
@@ -20,17 +24,62 @@ const OrderManagement = () => {
     getOrders();
   }, []);
 
+  // Filter function to show orders within a date range
+  const filterOrders = () => {
+    if (!startDate || !endDate) return; // Ensure both dates are selected
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Include the full day of the end date
+
+    const filtered = orders.filter(order => {
+      if (order.timestamp) {
+        const orderDate = new Date(order.timestamp.toDate());
+        return orderDate >= start && orderDate <= end;
+      }
+      return false;
+    });
+
+    setFilteredOrders(filtered);
+  };
+
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
         <h1 className="text-2xl font-bold mb-4">Order Management</h1>
 
-        {/* Display orders or a message if no orders exist */}
-        {orders.length === 0 ? (
-          <p>No orders found.</p>
+        {/* Date Range Filter */}
+        <div className="mb-4">
+          <label className="block text-gray-700">Start Date:</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+          
+          <label className="block text-gray-700 mt-2">End Date:</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+
+          <button
+            onClick={filterOrders}
+            className="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-700 transition"
+          >
+            Filter Orders
+          </button>
+        </div>
+
+        {/* Display orders or error message if no orders exist */}
+        {filteredOrders.length === 0 ? (
+          <p>No orders found in the selected range.</p>
         ) : (
           <ul className="space-y-4">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <li key={order.id} className="p-4 border rounded shadow-sm bg-gray-50">
                 <p><strong>Girl's Name:</strong> {order.girlName}</p>
                 <p><strong>Parent's Name:</strong> {order.parentName}</p>
