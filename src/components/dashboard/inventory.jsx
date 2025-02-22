@@ -1,0 +1,224 @@
+import React, { useEffect, useState } from "react";
+import { db } from "../../firebase/firebase";
+import { useAuth } from "../../contexts/authContext";
+import { useNavigate } from "react-router-dom";
+import { collection, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
+
+const Inventory = () => {
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
+    const [inventory, setInventory] = useState([]);
+    const [error, setError] = useState("");
+    const [editingId, setEditingId] = useState(null); // Track the item being edited
+    const [newQuantity, setNewQuantity] = useState(""); // New quantity for editing
+    const [newItemName, setNewItemName] = useState(""); // New item name
+    const [newItemQuantity, setNewItemQuantity] = useState(0); // New item quantity
+    const [showAddItemForm, setShowAddItemForm] = useState(false); // State to toggle Add Item form
+
+    useEffect(() => {
+        const fetchInventory = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, "inventory"));
+                setInventory(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            } catch (err) {
+                setError("Error fetching inventory.");
+                console.error(err);
+            }
+        };
+
+        fetchInventory();
+    }, [currentUser]);
+
+    const handleUpdate = async (id, change) => {
+        const item = inventory.find(item => item.id === id);
+        if (!item) return;
+
+        const newQuantity = item.quantity + change;
+
+        if (newQuantity < 0) {
+            setError("Quantity cannot be negative.");
+            return;
+        }
+
+        try {
+            const itemRef = doc(db, "inventory", id);
+            await updateDoc(itemRef, { quantity: newQuantity });
+            setInventory(prevInventory =>
+                prevInventory.map(item =>
+                    item.id === id ? { ...item, quantity: newQuantity } : item
+                )
+            );
+            setError("");
+        } catch (err) {
+            setError("Error updating inventory.");
+            console.error(err);
+        }
+    };
+
+    const handleSaveEdit = async (id) => {
+        if (newQuantity === "" || isNaN(newQuantity) || newQuantity < 0) {
+            setError("Please enter a valid quantity.");
+            return;
+        }
+
+        try {
+            const itemRef = doc(db, "inventory", id);
+            await updateDoc(itemRef, { quantity: parseInt(newQuantity) });
+            setInventory(prevInventory =>
+                prevInventory.map(item =>
+                    item.id === id ? { ...item, quantity: parseInt(newQuantity) } : item
+                )
+            );
+            setNewQuantity("");
+            setEditingId(null); // Stop editing
+            setError("");
+        } catch (err) {
+            setError("Error saving edited quantity.");
+            console.error(err);
+        }
+    };
+
+    // Add new inventory item
+    const handleAddItem = async (e) => {
+        e.preventDefault();
+
+        if (!newItemName || newItemQuantity < 0) {
+            setError("Please enter valid item details.");
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, "inventory"), {
+                name: newItemName,
+                quantity: newItemQuantity
+            });
+
+            // Clear form after submission
+            setNewItemName("");
+            setNewItemQuantity(0);
+
+            // Fetch updated inventory
+            const querySnapshot = await getDocs(collection(db, "inventory"));
+            setInventory(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+            setError(""); // Reset error message
+            setShowAddItemForm(false); // Hide form after submission
+        } catch (err) {
+            setError("Error adding item to inventory.");
+            console.error(err);
+        }
+    };
+
+    return (
+        <div className="p-8 bg-gray-100 min-h-screen">
+            <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
+                <h1 className="text-2xl font-bold mb-4">Inventory Management</h1>
+
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+
+                {/* Button to toggle Add Item form */}
+                {!showAddItemForm && (
+                    <button
+                        onClick={() => setShowAddItemForm(true)}
+                        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                    >
+                        Add Item
+                    </button>
+                )}
+
+                {/* Add Item Form */}
+                {showAddItemForm && (
+                    <form onSubmit={handleAddItem} className="mb-6">
+                        <h2 className="text-xl mb-4">Add New Item</h2>
+                        <div className="mb-4">
+                            <label className="block">Item Name</label>
+                            <input
+                                type="text"
+                                value={newItemName}
+                                onChange={(e) => setNewItemName(e.target.value)}
+                                className="w-full p-2 border rounded"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block">Initial Quantity</label>
+                            <input
+                                type="number"
+                                value={newItemQuantity}
+                                onChange={(e) => setNewItemQuantity(Number(e.target.value))}
+                                className="w-full p-2 border rounded"
+                                required
+                                min="0"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-700"
+                        >
+                            Add Item
+                        </button>
+                    </form>
+                )}
+
+                {/* Inventory List */}
+                <ul className="space-y-4">
+                    {inventory.map((item) => (
+                        <li key={item.id} className="flex justify-between items-center border-b pb-2">
+                            <span>{item.name}</span>
+
+                            <div className="flex items-center space-x-2">
+                                {/* Minus Button */}
+                                <button
+                                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                                    onClick={() => handleUpdate(item.id, -1)}
+                                >
+                                    -
+                                </button>
+
+                                {/* Editable Number of Boxes */}
+                                {editingId === item.id ? (
+                                    <input
+                                        type="number"
+                                        value={newQuantity}
+                                        onChange={(e) => setNewQuantity(e.target.value)}
+                                        className="w-16 p-2 border rounded text-center"
+                                        onBlur={() => handleSaveEdit(item.id)}
+                                        autoFocus
+                                    />
+                                ) : (
+                                    <span
+                                        onClick={() => {
+                                            setEditingId(item.id);
+                                            setNewQuantity(item.quantity);
+                                        }}
+                                        className="cursor-pointer"
+                                    >
+                                        {item.quantity} boxes
+                                    </span>
+                                )}
+
+                                {/* Plus Button */}
+                                <button
+                                    className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                                    onClick={() => handleUpdate(item.id, 1)}
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Back Button */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="mt-6 w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-700 transition"
+                >
+                    Go Back
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default Inventory;

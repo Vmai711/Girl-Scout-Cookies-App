@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyB7ebVoo4cI5zOcAekGzAzHxuWMpv0iMAo",
   authDomain: "girl-scout-cookies-app.firebaseapp.com",

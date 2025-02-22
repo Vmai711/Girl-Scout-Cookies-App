@@ -2,12 +2,14 @@ import Login from "./components/auth/login";
 import Register from "./components/auth/register";
 import GoogleRoleSelection from './components/auth/register/GoogleRoleSelection';
 
+//Home Components
 import Header from "./components/header";
 import Home from "./components/home";
 import ParentScout from "./components/home/parentscout";
 import CookieManager from "./components/home/cookiemanager";
 import TroopLeader from "./components/home/troopleader";
 
+//Dashboard Components
 import OrderManagement from "./components/dashboard/order_management";
 import Transactions from "./components/dashboard/transactions";
 import Dashboard from "./components/dashboard/dashboard"; 
@@ -15,6 +17,7 @@ import Prizes from "./components/dashboard/prizes";
 import Troops from "./components/dashboard/troops";
 import Cookies from "./components/dashboard/cookies";
 import Messages from "./components/dashboard/messages";
+import Inventory from "./components/dashboard/inventory";
 import Order from "./components/order_form/order_form";
 
 import { AuthProvider } from "./contexts/authContext";
@@ -38,6 +41,7 @@ function App() {
     { path: "/messages", element: <Messages /> },
     { path: "/prizes", element: <Prizes /> },
     { path: "/select-role", element: <GoogleRoleSelection /> },
+    { path: "/inventory", element: <Inventory /> },
     { path: "/order_form", element: <Order /> },
   ];
   

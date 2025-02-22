@@ -51,6 +51,7 @@ const Login = () => {
                 const userRef = doc(db, 'users', user.uid);
                 const userSnap = await getDoc(userRef);
     
+                //TODO: This just doesnt work
                 if (userSnap.exists() && userSnap.data().role) {
                     // User has a role, redirect to home
                     navigate('/home');

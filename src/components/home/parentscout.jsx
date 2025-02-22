@@ -35,11 +35,20 @@ const ParentScout = () => {
           Order Management Page
         </Link>
 
+        {/* Probably not necessary
         <Link
           to="/troops"
           className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
           Troops Page
+        </Link>
+        */}
+
+        <Link
+          to="/inventory"
+          className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600"
+        >
+          Inventory Page
         </Link>
 
         <Link

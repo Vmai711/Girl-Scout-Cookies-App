@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/authContext';
 import { db } from '../../../firebase/firebase'; // Firestore reference
 import { doc, setDoc } from 'firebase/firestore';
 
+//TODO: This just doesnt work
 const GoogleRoleSelection = () => {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
