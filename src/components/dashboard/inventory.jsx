@@ -9,11 +9,11 @@ const Inventory = () => {
     const navigate = useNavigate();
     const [inventory, setInventory] = useState([]);
     const [error, setError] = useState("");
-    const [editingId, setEditingId] = useState(null); // Track the item being edited
-    const [newQuantity, setNewQuantity] = useState(""); // New quantity for editing
-    const [newItemName, setNewItemName] = useState(""); // New item name
-    const [newItemQuantity, setNewItemQuantity] = useState(0); // New item quantity
-    const [showAddItemForm, setShowAddItemForm] = useState(false); // State to toggle Add Item form
+    const [editingId, setEditingId] = useState(null);
+    const [newQuantity, setNewQuantity] = useState("");
+    const [newItemName, setNewItemName] = useState("");
+    const [newItemQuantity, setNewItemQuantity] = useState(0);
+    const [showAddItemForm, setShowAddItemForm] = useState(false);
 
     useEffect(() => {
         const fetchInventory = async () => {
@@ -31,24 +31,12 @@ const Inventory = () => {
 
     const handleUpdate = async (id, change) => {
         const item = inventory.find(item => item.id === id);
-        if (!item) return;
-
-        const newQuantity = item.quantity + change;
-
-        if (newQuantity < 0) {
-            setError("Quantity cannot be negative.");
-            return;
-        }
+        if (!item || item.quantity + change < 0) return setError("Quantity cannot be negative.");
 
         try {
             const itemRef = doc(db, "inventory", id);
-            await updateDoc(itemRef, { quantity: newQuantity });
-            setInventory(prevInventory =>
-                prevInventory.map(item =>
-                    item.id === id ? { ...item, quantity: newQuantity } : item
-                )
-            );
-            setError("");
+            await updateDoc(itemRef, { quantity: item.quantity + change });
+            setInventory(prev => prev.map(item => item.id === id ? { ...item, quantity: item.quantity + change } : item));
         } catch (err) {
             setError("Error updating inventory.");
             console.error(err);
@@ -56,53 +44,32 @@ const Inventory = () => {
     };
 
     const handleSaveEdit = async (id) => {
-        if (newQuantity === "" || isNaN(newQuantity) || newQuantity < 0) {
-            setError("Please enter a valid quantity.");
-            return;
-        }
+        if (newQuantity === "" || isNaN(newQuantity) || newQuantity < 0) return setError("Please enter a valid quantity.");
 
         try {
             const itemRef = doc(db, "inventory", id);
             await updateDoc(itemRef, { quantity: parseInt(newQuantity) });
-            setInventory(prevInventory =>
-                prevInventory.map(item =>
-                    item.id === id ? { ...item, quantity: parseInt(newQuantity) } : item
-                )
-            );
+            setInventory(prev => prev.map(item => item.id === id ? { ...item, quantity: parseInt(newQuantity) } : item));
             setNewQuantity("");
-            setEditingId(null); // Stop editing
-            setError("");
+            setEditingId(null);
         } catch (err) {
             setError("Error saving edited quantity.");
             console.error(err);
         }
     };
 
-    // Add new inventory item
     const handleAddItem = async (e) => {
         e.preventDefault();
-
-        if (!newItemName || newItemQuantity < 0) {
-            setError("Please enter valid item details.");
-            return;
-        }
+        if (!newItemName || newItemQuantity < 0) return setError("Please enter valid item details.");
 
         try {
-            await addDoc(collection(db, "inventory"), {
-                name: newItemName,
-                quantity: newItemQuantity
-            });
-
-            // Clear form after submission
-            setNewItemName("");
-            setNewItemQuantity(0);
-
-            // Fetch updated inventory
+            await addDoc(collection(db, "inventory"), { name: newItemName, quantity: newItemQuantity });
             const querySnapshot = await getDocs(collection(db, "inventory"));
             setInventory(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-
-            setError(""); // Reset error message
-            setShowAddItemForm(false); // Hide form after submission
+            setNewItemName("");
+            setNewItemQuantity(0);
+            setShowAddItemForm(false);
+            setError("");
         } catch (err) {
             setError("Error adding item to inventory.");
             console.error(err);
@@ -113,21 +80,17 @@ const Inventory = () => {
         <div className="p-8 bg-gray-100 min-h-screen">
             <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
                 <h1 className="text-2xl font-bold mb-4">Inventory Management</h1>
-
                 {error && <p className="text-red-500 mb-4">{error}</p>}
 
-                {/* Button to toggle Add Item form */}
-                {!showAddItemForm && (
+                {/* Add Item Button / Form Toggle */}
+                {!showAddItemForm ? (
                     <button
                         onClick={() => setShowAddItemForm(true)}
                         className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
                     >
                         Add Item
                     </button>
-                )}
-
-                {/* Add Item Form */}
-                {showAddItemForm && (
+                ) : (
                     <form onSubmit={handleAddItem} className="mb-6">
                         <h2 className="text-xl mb-4">Add New Item</h2>
                         <div className="mb-4">
@@ -157,6 +120,14 @@ const Inventory = () => {
                         >
                             Add Item
                         </button>
+                        {/* Cancel Button */}
+                        <button
+                            type="button"
+                            onClick={() => setShowAddItemForm(false)}
+                            className="mt-2 w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-700"
+                        >
+                            Cancel
+                        </button>
                     </form>
                 )}
 
@@ -165,7 +136,6 @@ const Inventory = () => {
                     {inventory.map((item) => (
                         <li key={item.id} className="flex justify-between items-center border-b pb-2">
                             <span>{item.name}</span>
-
                             <div className="flex items-center space-x-2">
                                 {/* Minus Button */}
                                 <button
@@ -175,7 +145,7 @@ const Inventory = () => {
                                     -
                                 </button>
 
-                                {/* Editable Number of Boxes */}
+                                {/* Editable Quantity */}
                                 {editingId === item.id ? (
                                     <input
                                         type="number"
