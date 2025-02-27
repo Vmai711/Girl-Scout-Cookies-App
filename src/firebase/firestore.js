@@ -26,3 +26,19 @@ export const fetchOrders = async () => {
         throw error;
     }
 };
+
+export const saveReservation = async (boothData) => {
+    try {
+        console.log("Saving booth reservation:", boothData); // Log data before saving
+        const docRef = await addDoc(collection(db, 'reservations'), {
+            ...boothData,
+            timestamp: serverTimestamp() // Adds a timestamp for order tracking
+        });
+        console.log("Booth reserved successfully with ID:", docRef.id);
+        return docRef.id;
+    } catch (error) {
+        console.error('Error saving reservation:', error);
+        throw error;
+    }
+};
+
