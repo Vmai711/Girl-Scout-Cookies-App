@@ -3,7 +3,6 @@ import Register from "./components/auth/register";
 import GoogleRoleSelection from "./components/auth/register/GoogleRoleSelection";
 
 //Home Components
-import Header from "./components/header";
 import Home from "./components/home";
 import ParentScout from "./components/home/parentscout";
 import CookieManager from "./components/home/cookiemanager";
