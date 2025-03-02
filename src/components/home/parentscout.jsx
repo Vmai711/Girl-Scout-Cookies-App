@@ -28,7 +28,7 @@ const ParentScout = () => {
             <Sidebar.ItemGroup>
               <Link
                 to="/dashboard"
-                className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600 p-2"
+                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
                 >
                   <div className="flex gap-3">
                     <Grid/>
@@ -38,7 +38,7 @@ const ParentScout = () => {
 
               <Link
                 to="/order-management"
-                className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600 p-2"
+                className="block text-center hover:text-black py-3 mb-2 rounded-md hover:bg-custom-dark-green p-2 text-gray-600"
               >
                 <div className="flex gap-3">
                   <Inbox/>
@@ -48,7 +48,7 @@ const ParentScout = () => {
 
               <Link
                 to="/inventory"
-                className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2"
+                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
                 <div className="flex gap-3">
                   <Inbox/>
@@ -58,7 +58,7 @@ const ParentScout = () => {
 
               <Link
                 to="/transactions"
-                className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600 p-2"
+                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
                 <div className="flex gap-3">
                   <Receipt/>
@@ -68,7 +68,7 @@ const ParentScout = () => {
 
               <Link
                 to="/cookies"
-                className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600 p-2"
+                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
                 <div className="flex gap-3">
                   <Palette/>
@@ -78,7 +78,7 @@ const ParentScout = () => {
 
               <Link
                 to="/messages"
-                className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600 p-2"
+                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
                 <div className="flex gap-3">
                   <Messages/>
@@ -88,7 +88,7 @@ const ParentScout = () => {
 
               <Link
                 to="/prizes"
-                className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600 p-2"
+                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
                 <div className="flex gap-3">
                   <Award/>
@@ -98,7 +98,7 @@ const ParentScout = () => {
 
               <Link
                 to="/booth"
-                className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600 p-2"
+                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
                 <div className="flex gap-3">
                   <Store/>
