@@ -11,7 +11,6 @@ const Header = () => {
     return (
         <Navbar fluid rounded className='fixed top-0 w-[calc(100%-16rem)]'>
         <Navbar.Brand>
-        <img src="" className="mr-3 h-6 sm:h-9" alt="Logo" />
         <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Cookie</span>
         </Navbar.Brand>
         <div className="flex md:order-2">
