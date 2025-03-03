@@ -20,8 +20,8 @@ const Order = () => {
 
     //Rename these to actual cookie names and add/delete as needed
     const cookieOptions = [
-        'Cookies1', 'Cookies2', 'Cookies3', 'Cookies4', 'Cookies5',
-        'Cookies6', 'Cookies7', 'Cookies8', 'Cookies9', 'Cookies10'
+        'Adventurefuls', 'Toast-Yays', 'Lemonades', 'Trefoil', 'Thin Mints',
+        'Peanut Butter Patties', 'Caramel deLites', 'Peanut Butter Sandwich', 'Caramel Chocolate Chip'
     ];
 
     const handleSubmit = async (e) => {

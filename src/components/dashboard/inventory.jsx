@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase/firebase";
 import { useAuth } from "../../contexts/authContext";
-import { useNavigate } from "react-router-dom";
 import { collection, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
 
 import Header from "../header";
@@ -9,7 +8,6 @@ import SideBar from "../sidebar/sidebar";
 
 const Inventory = () => {
     const { currentUser } = useAuth();
-    const navigate = useNavigate();
     const [inventory, setInventory] = useState([]);
     const [error, setError] = useState("");
     const [editingId, setEditingId] = useState(null);
@@ -185,14 +183,6 @@ const Inventory = () => {
                             </li>
                         ))}
                     </ul>
-
-                    {/* Back Button */}
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="mt-6 w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-700 transition"
-                    >
-                        Go Back
-                    </button>
                 </div>
         </main>
       </div>
