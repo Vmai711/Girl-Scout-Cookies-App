@@ -6,18 +6,31 @@ import SideBar from "../sidebar/sidebar";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { PieChart, Pie, Legend } from "recharts";
 
+// Define a color pool with enough unique colors
+const colorPool = [
+  "#FFB6C1", 
+  "#FFD700", 
+  "#87CEEB", 
+  "#FF69B4",
+  "#98FB98", 
+  "#FFA07A", 
+  "#8A2BE2", 
+  "#FF6347", 
+  "#00FA9A", 
+  "#D2691E",
+  "#9ACD32", 
+  "#FF4500", 
+];
+
 const Dashboard = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [activeMonth, setActiveMonth] = useState(null); // to store the selected month on click
+  const [activeMonth, setActiveMonth] = useState(null);
+  const [cookieColors, setCookieColors] = useState({}); // Object to store colors for each cookie type
 
   useEffect(() => {
-    // Set the endDate to the current date by default
-    const today = new Date().toISOString().split("T")[0];
-    setEndDate(today);
-
     const fetchOrders = async () => {
       const ordersRef = collection(db, "orders");
       const q = query(ordersRef, orderBy("timestamp", "asc"));
@@ -27,17 +40,32 @@ const Dashboard = () => {
       setFilteredOrders(ordersData);
     };
 
+    const fetchCookieTypes = async () => {
+      const cookieRef = collection(db, "cookieTypes");
+      const snapshot = await getDocs(cookieRef);
+      const cookieData = snapshot.docs.map((doc) => doc.data().Types).flat();
+
+      const colors = {};
+
+      // Assign colors to cookie types, cycling through the color pool
+      cookieData.forEach((cookie, index) => {
+        colors[cookie] = colorPool[index % colorPool.length]; 
+      });
+
+      setCookieColors(colors); // Set the color mapping for cookie types
+    };
+
     fetchOrders();
-  }, []);
+    fetchCookieTypes();
+  }, []); 
 
   useEffect(() => {
     if (startDate || endDate) {
-      // Normalize start and end dates to remove the time portion (set to midnight)
       const start = new Date(startDate || "1970-01-01");
-      start.setHours(0, 0, 0, 0); // set to midnight
+      start.setHours(0, 0, 0, 0);
 
       const end = new Date(endDate || new Date().toISOString().split("T")[0]);
-      end.setHours(23, 59, 59, 999); // set to the end of the day
+      end.setHours(23, 59, 59, 999);
 
       const filtered = orders.filter(({ timestamp }) => {
         const orderDate = new Date(timestamp.seconds * 1000);
@@ -57,7 +85,6 @@ const Dashboard = () => {
       const month = `${date.getFullYear()}-${date.getMonth() + 1}`;
       let cookiesSold = 0;
 
-      // Sum up the cookies selected in the cookieSelections array
       cookieSelections.forEach(({ numCookies }) => {
         cookiesSold += Number(numCookies);
       });
@@ -72,7 +99,6 @@ const Dashboard = () => {
   const processCookieSales = (month) => {
     const cookieSales = {};
     if (month === null) {
-      // Calculate total sales if no month is selected
       filteredOrders.forEach(({ cookieSelections }) => {
         cookieSelections.forEach(({ cookie, numCookies }) => {
           const cookiesSold = Number(numCookies);
@@ -82,7 +108,6 @@ const Dashboard = () => {
         });
       });
     } else {
-      // Calculate sales for the selected month
       filteredOrders
         .filter(({ timestamp }) => {
           const date = new Date(timestamp.seconds * 1000);
@@ -98,19 +123,6 @@ const Dashboard = () => {
         });
     }
     return Object.keys(cookieSales).map((cookie) => ({ name: cookie, value: cookieSales[cookie] }));
-  };
-
-  // Assigning specific colors to each cookie type
-  const COOKIE_COLORS = {
-    "Adventurefuls": "#FFB6C1",
-    "Toast-Yays": "#FFD700",
-    "Lemonades": "#87CEEB",
-    "Trefoil": "#FF69B4",
-    "Thin Mints": "#98FB98",
-    "Peanut Butter Patties": "#FFA07A",
-    "Caramel deLites": "#8A2BE2",
-    "Peanut Butter Sandwich": "#FF6347",
-    "Caramel Chocolate Chip": "#00FA9A"
   };
 
   return (
@@ -143,10 +155,9 @@ const Dashboard = () => {
                   <LineChart
                     data={processSalesData()}
                     onClick={(e) => {
-                      // Check if activePayload exists and has data before trying to access
                       if (e && e.activePayload && e.activePayload.length > 0) {
                         const selectedMonth = e.activePayload[0].payload.name;
-                        setActiveMonth(selectedMonth); // set the month for which to display pie chart
+                        setActiveMonth(selectedMonth);
                       } else {
                         setActiveMonth(null); // if clicked outside, reset to total sales
                       }
@@ -162,7 +173,7 @@ const Dashboard = () => {
                   <PieChart>
                     <Pie data={processCookieSales(activeMonth)} dataKey="value" nameKey="name" outerRadius={100}>
                       {processCookieSales(activeMonth).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COOKIE_COLORS[entry.name] || "#8884d8"} />
+                        <Cell key={`cell-${index}`} fill={cookieColors[entry.name] || "#8884d8"} />
                       ))}
                     </Pie>
                     <Tooltip />
