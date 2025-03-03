@@ -16,18 +16,34 @@ const Booth = () => {
     const [parentName, setParentName] = useState('');
     const [boothLocation, setBoothLocation] = useState('');
     const [startingTime, setStartTime] = useState('');
+    const [date, setDate] = useState("");
     const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
 
     // Should be able to add locations (Troop Leader and Cookie Managers)
     const BoothLocations = [
         'Walmart', 'Kroger', 'Movie Theater', 'Store'
     ];
+
+    const generateTimeSlots = (interval, startHour, endHour) => {
+    let times = [];
+    let startTime = new Date();
+    startTime.setHours(startHour, 0, 0, 0); // Start at the given startHour, at minute 0
+    let endTime = new Date();
+    endTime.setHours(endHour, 0, 0, 0); // End at the given endHour, at minute 0
     
-    // Will find some way to properly set time
-    const TimeSlots = [
-        '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM',
-        '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
-    ];
+    while (startTime <= endTime) {
+        const hour = startTime.getHours();
+        const minute = startTime.getMinutes();
+        const formattedTime = `${hour > 12 ? hour - 12 : hour}:${minute === 0 ? '00' : minute < 10 ? '0' + minute : minute} ${hour >= 12 ? 'PM' : 'AM'}`;
+        times.push(formattedTime);
+        startTime.setMinutes(startTime.getMinutes() + interval); // Increment by interval
+    }
+    
+    return times;
+};
+
+    const timeSlots = generateTimeSlots(15, 7, 19); // Generate 15-minute intervals;
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -43,13 +59,14 @@ const Booth = () => {
             parentName,
             boothLocation,
             startingTime,
+            date,
             acceptedResponsibility,
             timestamp: new Date()
         };
 
         try {
             const boothId = await saveReservation(boothData);  
-            alert(`Booth has been reserved successfully! (ID: ${boothId}) ${boothLocation} has been reserved for ${startingTime}`);
+            alert(`Booth has been reserved successfully! (ID: ${boothId}) ${boothLocation} has been reserved for ${startingTime} on ${date}`);
             
             // Redirect only if the order is successfully submitted
             navigate('/home');
@@ -130,17 +147,29 @@ const Booth = () => {
                     <div className="mb-4">
                         <label className="block font-semibold">Starting Time:</label>
                         <select
-                            type="text"
                             value={startingTime}
-                            onChange={(e) => setStartTime(e.target.value)}
-                            required
-                            className="w-full p-2 border rounded"
+                        onChange={(e) => setStartTime(e.target.value)}
+                        required
+                        className="w-full p-2 border rounded"
                         >
                         <option value="">Select Time</option>
-                            {TimeSlots.map((time, index) => (
-                                <option key={index} value={time}>{time}</option>
+                            {timeSlots.map((time, index) => (
+                                <option key={index} value={time}>
+                                    {time}
+                                </option>
                             ))}
                         </select>
+                    </div>
+
+                    {/* Schedule Date */}
+                    <div className="mb-4">
+                        <label className="block font-semibold">Date:</label>
+                        <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="px-4 py-2 border rounded-md"
+                        />
                     </div>
 
                     {/* Booth Confirmation */}
