@@ -14,6 +14,10 @@ const Dashboard = () => {
   const [activeMonth, setActiveMonth] = useState(null); // to store the selected month on click
 
   useEffect(() => {
+    // Set the endDate to the current date by default
+    const today = new Date().toISOString().split("T")[0];
+    setEndDate(today);
+
     const fetchOrders = async () => {
       const ordersRef = collection(db, "orders");
       const q = query(ordersRef, orderBy("timestamp", "asc"));
@@ -27,33 +31,37 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
+    // Filter orders based on startDate and endDate whenever either changes
+    if (startDate || endDate) {
+      const start = new Date(startDate || "1970-01-01"); // default to far past date if startDate is empty
+      const end = new Date(endDate || new Date().toISOString().split("T")[0]); // default to current date if endDate is empty
+
       const filtered = orders.filter(({ timestamp }) => {
         const orderDate = new Date(timestamp.seconds * 1000);
         return orderDate >= start && orderDate <= end;
       });
+
       setFilteredOrders(filtered);
-    } else {
-      setFilteredOrders(orders);
     }
   }, [startDate, endDate, orders]);
 
-  const filterLastDays = (days) => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(end.getDate() - days);
-    setStartDate(start.toISOString().split("T")[0]);
-    setEndDate(end.toISOString().split("T")[0]);
-  };
+  useEffect(() => {
+    // Reset the pie chart when date filter changes
+    setActiveMonth(null); // reset to the full data
+  }, [startDate, endDate]);
 
   const processSalesData = () => {
     const salesByMonth = {};
-    filteredOrders.forEach(({ timestamp, numCookies }) => {
+    filteredOrders.forEach(({ timestamp, numCookies, cookieSelections }) => {
       const date = new Date(timestamp.seconds * 1000);
       const month = `${date.getFullYear()}-${date.getMonth() + 1}`;
-      const cookiesSold = Number(numCookies);
+      let cookiesSold = 0;
+
+      // Sum up the cookies selected in the cookieSelections array
+      cookieSelections.forEach(({ numCookies }) => {
+        cookiesSold += Number(numCookies);
+      });
+
       if (!isNaN(cookiesSold)) {
         salesByMonth[month] = (salesByMonth[month] || 0) + cookiesSold;
       }
@@ -65,11 +73,13 @@ const Dashboard = () => {
     const cookieSales = {};
     if (month === null) {
       // Calculate total sales if no month is selected
-      filteredOrders.forEach(({ cookieSelection, numCookies }) => {
-        const cookiesSold = Number(numCookies);
-        if (!isNaN(cookiesSold)) {
-          cookieSales[cookieSelection] = (cookieSales[cookieSelection] || 0) + cookiesSold;
-        }
+      filteredOrders.forEach(({ cookieSelections }) => {
+        cookieSelections.forEach(({ cookie, numCookies }) => {
+          const cookiesSold = Number(numCookies);
+          if (!isNaN(cookiesSold)) {
+            cookieSales[cookie] = (cookieSales[cookie] || 0) + cookiesSold;
+          }
+        });
       });
     } else {
       // Calculate sales for the selected month
@@ -78,11 +88,13 @@ const Dashboard = () => {
           const date = new Date(timestamp.seconds * 1000);
           return `${date.getFullYear()}-${date.getMonth() + 1}` === month;
         })
-        .forEach(({ cookieSelection, numCookies }) => {
-          const cookiesSold = Number(numCookies);
-          if (!isNaN(cookiesSold)) {
-            cookieSales[cookieSelection] = (cookieSales[cookieSelection] || 0) + cookiesSold;
-          }
+        .forEach(({ cookieSelections }) => {
+          cookieSelections.forEach(({ cookie, numCookies }) => {
+            const cookiesSold = Number(numCookies);
+            if (!isNaN(cookiesSold)) {
+              cookieSales[cookie] = (cookieSales[cookie] || 0) + cookiesSold;
+            }
+          });
         });
     }
     return Object.keys(cookieSales).map((cookie) => ({ name: cookie, value: cookieSales[cookie] }));
@@ -113,10 +125,17 @@ const Dashboard = () => {
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="px-4 py-2 border rounded-md" />
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="px-4 py-2 border rounded-md" />
             </div>
-            <div className="flex justify-center gap-4 mb-4">
-              <button onClick={() => filterLastDays(7)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition">Past Week</button>
-              <button onClick={() => filterLastDays(30)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition">Past Month</button>
+
+            {/* Reset Pie Chart Button */}
+            <div className="flex justify-center mb-4">
+              <button
+                onClick={() => setActiveMonth(null)} // Reset the active month to null
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
+              >
+                Reset Pie Chart
+              </button>
             </div>
+
             <div className="mt-6">
               <h2 className="text-xl font-semibold mb-4">Cookie Sales by Type</h2>
               <div className="grid md:grid-cols-2 gap-6">

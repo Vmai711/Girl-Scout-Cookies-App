@@ -77,7 +77,17 @@ const OrderManagement = () => {
                   <li key={order.id} className="p-4 border rounded shadow-sm bg-gray-50">
                     <p><strong>Girl's Name:</strong> {order.girlName}</p>
                     <p><strong>Parent's Name:</strong> {order.parentName}</p>
-                    <p><strong>Cookies:</strong> {order.cookieSelection} ({order.numCookies})</p>
+                    
+                    {/* Displaying multiple cookies */}
+                    <p><strong>Cookies:</strong></p>
+                    <ul className="list-disc pl-6">
+                      {order.cookieSelections?.map((cookieSelection, index) => (
+                        <li key={index}>
+                          {cookieSelection.cookie} ({cookieSelection.numCookies})
+                        </li>
+                      ))}
+                    </ul>
+                    
                     <p><strong>Pickup Location:</strong> {order.pickupLocation}</p>
                     <p><strong>Contact Method:</strong> {order.contactMethod}</p>
                     <p><strong>Timestamp:</strong> {order.timestamp ? new Date(order.timestamp.toDate()).toLocaleString() : "N/A"}</p>
