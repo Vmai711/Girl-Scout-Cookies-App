@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/authContext';
 import { useNavigate } from 'react-router-dom';
-import { saveOrder } from '../../firebase/firestore';
+import { saveOrder, fetchCookieTypes, updateCookieTypes } from '../../firebase/firestore';
 import Header from '../header';
 import SideBar from '../sidebar/sidebar';
 
@@ -11,15 +11,27 @@ const Order = () => {
 
     const [girlName, setGirlName] = useState('');
     const [parentName, setParentName] = useState('');
-    const [cookieSelections, setCookieSelections] = useState([{ cookie: '', numCookies: '' }]); // Allow multiple cookie selections
+    const [cookieSelections, setCookieSelections] = useState([{ cookie: '', numCookies: '' }]);
     const [pickupLocation, setPickupLocation] = useState('');
     const [contactMethod, setContactMethod] = useState('');
     const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
+    const [cookieTypes, setCookieTypes] = useState([]);
+    const [editing, setEditing] = useState(false);
+    const [newCookieType, setNewCookieType] = useState('');
 
-    const cookieOptions = [
-        'Adventurefuls', 'Toast-Yays', 'Lemonades', 'Trefoil', 'Thin Mints',
-        'Peanut Butter Patties', 'Caramel deLites', 'Peanut Butter Sandwich', 'Caramel Chocolate Chip'
-    ];
+    // Fetch the cookie types from Firestore when the component mounts
+    useEffect(() => {
+        const getCookieTypes = async () => {
+            try {
+                const types = await fetchCookieTypes(); // Function to fetch cookie types from Firestore
+                setCookieTypes(types);
+            } catch (error) {
+                console.error("Error fetching cookie types:", error);
+            }
+        };
+
+        getCookieTypes();
+    }, []);
 
     const handleCookieChange = (index, field, value) => {
         const newCookieSelections = [...cookieSelections];
@@ -29,6 +41,11 @@ const Order = () => {
 
     const addCookieSelection = () => {
         setCookieSelections([...cookieSelections, { cookie: '', numCookies: '' }]);
+    };
+
+    const removeCookieSelection = (index) => {
+        const newCookieSelections = cookieSelections.filter((_, i) => i !== index);
+        setCookieSelections(newCookieSelections);
     };
 
     const handleSubmit = async (e) => {
@@ -53,12 +70,36 @@ const Order = () => {
         try {
             const orderId = await saveOrder(orderData);
             alert(`Order submitted successfully! Your Order ID is: ${orderId}`);
-
-            // Navigate back to the previous page after submitting the order
             navigate(-1);
         } catch (error) {
             console.error("Error submitting order:", error);
             alert("There was an error submitting your order. Please try again.");
+        }
+    };
+
+    const handleAddCookieType = async () => {
+        if (!newCookieType) {
+            alert("Please enter a new cookie type.");
+            return;
+        }
+
+        try {
+            const updatedCookieTypes = [...cookieTypes, newCookieType];
+            await updateCookieTypes(updatedCookieTypes); // Function to update Firestore with new cookie types
+            setCookieTypes(updatedCookieTypes);
+            setNewCookieType('');
+        } catch (error) {
+            console.error("Error adding cookie type:", error);
+        }
+    };
+
+    const handleRemoveCookieType = async (cookieTypeToRemove) => {
+        try {
+            const updatedCookieTypes = cookieTypes.filter((cookie) => cookie !== cookieTypeToRemove);
+            await updateCookieTypes(updatedCookieTypes); // Function to update Firestore with new cookie types
+            setCookieTypes(updatedCookieTypes);
+        } catch (error) {
+            console.error("Error removing cookie type:", error);
         }
     };
 
@@ -111,7 +152,7 @@ const Order = () => {
                             <div className="mb-4">
                                 <label className="block font-semibold">Select Cookies:</label>
                                 {cookieSelections.map((cookieSelection, index) => (
-                                    <div key={index} className="flex gap-4 mb-4">
+                                    <div key={index} className="flex gap-4 mb-4 items-center">
                                         <select
                                             value={cookieSelection.cookie}
                                             onChange={(e) => handleCookieChange(index, 'cookie', e.target.value)}
@@ -119,7 +160,7 @@ const Order = () => {
                                             className="w-1/2 p-2 border rounded"
                                         >
                                             <option value="">Select Cookie</option>
-                                            {cookieOptions.map((cookie, i) => (
+                                            {cookieTypes.map((cookie, i) => (
                                                 <option key={i} value={cookie}>{cookie}</option>
                                             ))}
                                         </select>
@@ -131,6 +172,13 @@ const Order = () => {
                                             className="w-1/2 p-2 border rounded"
                                             placeholder="Number of Cookies"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeCookieSelection(index)}
+                                            className="text-red-500 ml-2"
+                                        >
+                                            X
+                                        </button>
                                     </div>
                                 ))}
                                 <button
@@ -141,6 +189,54 @@ const Order = () => {
                                     Add another cookie
                                 </button>
                             </div>
+
+                            {/* Editing Cookie Types */}
+                            {editing && (
+                                <div className="mb-4">
+                                    <label className="block font-semibold">Add a New Cookie Type:</label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text"
+                                            value={newCookieType}
+                                            onChange={(e) => setNewCookieType(e.target.value)}
+                                            className="p-2 border rounded w-2/3"
+                                        />
+                                        <button 
+                                            type="button"
+                                            onClick={handleAddCookieType}
+                                            className="bg-blue-500 text-white p-2 rounded"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+
+                                    <div className="mt-4">
+                                        <h3 className="font-semibold">Existing Cookie Types:</h3>
+                                        <ul>
+                                            {cookieTypes.map((cookieType, index) => (
+                                                <li key={index} className="flex justify-between items-center">
+                                                    <span>{cookieType}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveCookieType(cookieType)}
+                                                        className="text-red-500"
+                                                    >
+                                                        X
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+
+                            <button
+                                type="button"
+                                onClick={() => setEditing(!editing)}
+                                className="text-blue-500 mt-4"
+                            >
+                                {editing ? "Cancel Editing" : "Edit Cookie Types"}
+                            </button>
 
                             {/* Pickup Location */}
                             <div className="mb-4">

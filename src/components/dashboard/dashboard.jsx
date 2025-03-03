@@ -31,10 +31,13 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    // Filter orders based on startDate and endDate whenever either changes
     if (startDate || endDate) {
-      const start = new Date(startDate || "1970-01-01"); // default to far past date if startDate is empty
-      const end = new Date(endDate || new Date().toISOString().split("T")[0]); // default to current date if endDate is empty
+      // Normalize start and end dates to remove the time portion (set to midnight)
+      const start = new Date(startDate || "1970-01-01");
+      start.setHours(0, 0, 0, 0); // set to midnight
+
+      const end = new Date(endDate || new Date().toISOString().split("T")[0]);
+      end.setHours(23, 59, 59, 999); // set to the end of the day
 
       const filtered = orders.filter(({ timestamp }) => {
         const orderDate = new Date(timestamp.seconds * 1000);
@@ -42,13 +45,10 @@ const Dashboard = () => {
       });
 
       setFilteredOrders(filtered);
+    } else {
+      setFilteredOrders(orders); // If no date is set, show all orders
     }
   }, [startDate, endDate, orders]);
-
-  useEffect(() => {
-    // Reset the pie chart when date filter changes
-    setActiveMonth(null); // reset to the full data
-  }, [startDate, endDate]);
 
   const processSalesData = () => {
     const salesByMonth = {};
