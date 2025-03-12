@@ -85,7 +85,7 @@ const Order = () => {
 
         try {
             const updatedCookieTypes = [...cookieTypes, newCookieType];
-            await updateCookieTypes(updatedCookieTypes); // Function to update Firestore with new cookie types
+            await updateCookieTypes(updatedCookieTypes); 
             setCookieTypes(updatedCookieTypes);
             setNewCookieType('');
         } catch (error) {
@@ -96,7 +96,7 @@ const Order = () => {
     const handleRemoveCookieType = async (cookieTypeToRemove) => {
         try {
             const updatedCookieTypes = cookieTypes.filter((cookie) => cookie !== cookieTypeToRemove);
-            await updateCookieTypes(updatedCookieTypes); // Function to update Firestore with new cookie types
+            await updateCookieTypes(updatedCookieTypes); 
             setCookieTypes(updatedCookieTypes);
         } catch (error) {
             console.error("Error removing cookie type:", error);

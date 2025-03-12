@@ -1,6 +1,8 @@
 import { db } from './firebase'; 
 import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/authContext';
+import { useState, useEffect } from 'react';
+
 
 export const fetchUserRole = async (uid) => {
     try {

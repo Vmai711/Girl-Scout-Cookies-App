@@ -1,6 +1,5 @@
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
-import GoogleRoleSelection from "./components/auth/register/GoogleRoleSelection";
 
 //Home Components
 import Home from "./components/home";
@@ -39,7 +38,6 @@ function App() {
     { path: "/cookies", element: <Cookies /> },
     { path: "/messages", element: <Messages /> },
     { path: "/prizes", element: <Prizes /> },
-    { path: "/select-role", element: <GoogleRoleSelection /> },
     { path: "/inventory", element: <Inventory /> },
     { path: "/order_form", element: <Order /> },
     { path: "/booth", element: <Booth /> },
