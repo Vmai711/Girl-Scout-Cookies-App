@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useUserRole } from "../../firebase/roleUtils"; 
 
 import { Sidebar } from "flowbite-react";
 
@@ -15,6 +16,7 @@ import { Cart } from "flowbite-react-icons/outline";
 
 
 const SideBar = () => {
+  const role = useUserRole();
 
   return (
       <div>
@@ -101,6 +103,18 @@ const SideBar = () => {
                   Booth Page
                 </div>
               </Link>
+
+              {/* Conditionally render Troops Page link based on role */}
+              {role === "cookie-manager" || role === "admin" ? (
+              <Link 
+                to="/troops" 
+                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              >
+                <div className="flex gap-3">
+                  Troops Page
+                </div>
+              </Link>
+              ) : null}
 
               <Link
                 to="/order_form"
