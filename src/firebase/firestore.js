@@ -47,19 +47,20 @@ export const saveReservation = async (boothData) => {
 // Fetch Cookie Types from Firestore
 export const fetchCookieTypes = async () => {
     try {
-        const docRef = doc(db, "cookieTypes", "Cookie Types Config");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return docSnap.data().Types || []; 
-        } else {
-            console.error("No such document!");
-            return [];
-        }
+      const docRef = doc(db, "cookieTypes", "Cookie Types Config"); // Reference to the config document
+      const docSnap = await getDoc(docRef);
+  
+      if (docSnap.exists()) {
+        return Object.keys(docSnap.data()); // Only return the cookie names
+      } else {
+        console.log("No cookie types found!");
+        return [];
+      }
     } catch (error) {
-        console.error("Error fetching cookie types:", error);
-        throw new Error("Failed to fetch cookie types");
+      console.error("Error fetching cookie types:", error);
+      return [];
     }
-};
+  };
 
 // Update Cookie Types in Firestore
 export const updateCookieTypes = async (updatedTypes) => {
