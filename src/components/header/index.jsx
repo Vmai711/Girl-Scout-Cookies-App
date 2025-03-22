@@ -6,7 +6,7 @@ import { useUserRole } from '../../firebase/roleUtils';
 
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
 
-const Header = () => {
+const Header = ({page}) => {
     const navigate = useNavigate()
     const { userLoggedIn, currentUser } = useAuth()
     const userRole = useUserRole() // Fetch user role
@@ -14,7 +14,7 @@ const Header = () => {
     return (
         <Navbar fluid rounded className='fixed top-0 w-[calc(100%-16rem)]'>
         <Navbar.Brand>
-        <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">Cookie</span>
+        <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">{page}</span>
         </Navbar.Brand>
         <div className="flex md:order-2">
         <Dropdown

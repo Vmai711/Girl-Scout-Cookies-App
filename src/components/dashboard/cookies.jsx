@@ -137,7 +137,7 @@ const Cookies = () => {
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar />
       <div className="w-full h-fit sm:ml-64">
-        <Header />
+        <Header page={"Cookies"}/>
         <main className="mt-[3.5rem] p-8">
           <div className="bg-white max-w-6xl mx-auto p-6 rounded-md shadow-md">
             <h1 className="text-3xl font-bold mb-6 text-center">Manage Cookies</h1>

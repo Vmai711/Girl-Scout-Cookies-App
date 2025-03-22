@@ -129,7 +129,7 @@ const Dashboard = () => {
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar />
       <div className="w-full h-fit sm:ml-64">
-        <Header />
+        <Header page={"Dashboard"}/>
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
           <div className="bg-white p-6 rounded-md shadow-md">
             <h1 className="text-3xl font-bold mb-6 text-center">Dashboard</h1>

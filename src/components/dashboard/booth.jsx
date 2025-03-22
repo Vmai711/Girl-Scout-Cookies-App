@@ -84,7 +84,7 @@ const Booth = () => {
         <SideBar/>
   
         <div className="w-full h-fit sm:ml-64">
-          <Header />
+          <Header page={"Booth"}/>
           <main className="mt-[3.5rem] p-8">
             <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
                 <h2 className="text-2xl font-bold mb-4">Booth Reservation Form</h2>

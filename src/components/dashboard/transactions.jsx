@@ -9,7 +9,7 @@ const Transactions = () => {
       <SideBar/>
 
       <div className="w-full h-fit sm:ml-64">
-        <Header />
+        <Header page={"Transactions"}/>
         <main className="mt-[3.5rem] p-8">
         <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
           <h1 className="text-2xl font-bold mb-4">Transaction Management</h1>
