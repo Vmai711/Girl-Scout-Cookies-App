@@ -3,6 +3,7 @@ import { fetchOrders } from "../../firebase/firestore";
 
 import Header from "../header";
 import SideBar from "../sidebar/sidebar";
+import OrderManagementTable from "../tables/order_management_table";
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -72,28 +73,7 @@ const OrderManagement = () => {
             {filteredOrders.length === 0 ? (
               <p className="text-center">No orders found in the selected range.</p>
             ) : (
-              <ul className="space-y-4">
-                {filteredOrders.map((order) => (
-                  <li key={order.id} className="p-4 border rounded shadow-sm bg-gray-50">
-                    <p><strong>Girl's Name:</strong> {order.girlName}</p>
-                    <p><strong>Parent's Name:</strong> {order.parentName}</p>
-                    
-                    {/* Displaying multiple cookies */}
-                    <p><strong>Cookies:</strong></p>
-                    <ul className="list-disc pl-6">
-                      {order.cookieSelections?.map((cookieSelection, index) => (
-                        <li key={index}>
-                          {cookieSelection.cookie} ({cookieSelection.numCookies})
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    <p><strong>Pickup Location:</strong> {order.pickupLocation}</p>
-                    <p><strong>Contact Method:</strong> {order.contactMethod}</p>
-                    <p><strong>Timestamp:</strong> {order.timestamp ? new Date(order.timestamp.toDate()).toLocaleString() : "N/A"}</p>
-                  </li>
-                ))}
-              </ul>
+              <OrderManagementTable orders={filteredOrders}/>
             )}
           </div>
         </main>
