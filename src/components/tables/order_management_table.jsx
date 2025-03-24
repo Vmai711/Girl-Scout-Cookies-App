@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { Table, Select } from "flowbite-react";
 import { AngleDown } from "flowbite-react-icons/outline";
