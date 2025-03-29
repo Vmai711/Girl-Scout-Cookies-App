@@ -2,6 +2,7 @@ import React from "react";
 
 import Header from "../header";
 import SideBar from "../sidebar/sidebar";
+import TroopsTable from "../tables/troopsTable";
 
 const Troops = () => {
   return (
@@ -9,11 +10,12 @@ const Troops = () => {
       <SideBar/>
 
       <div className="w-full h-fit sm:ml-64">
-        <Header />
+        <Header page={"Troops"}/>
         <main className="mt-[3.5rem] p-8">
-        <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
+        <div className="bg-white w-full mx-auto p-6 rounded-md shadow-md">
           <h1 className="text-2xl font-bold mb-4">Troops Page</h1>
           <p>Manage your troops.</p>
+          <TroopsTable/>
         </div>
         </main>
       </div>
