@@ -13,6 +13,7 @@ import { Messages } from "flowbite-react-icons/outline";
 import { Award } from "flowbite-react-icons/outline";
 import { Store } from "flowbite-react-icons/outline";
 import { Cart } from "flowbite-react-icons/outline";
+import { UsersGroup } from "flowbite-react-icons/outline";
 
 
 const SideBar = () => {
@@ -111,6 +112,7 @@ const SideBar = () => {
                 className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
                 <div className="flex gap-3">
+                  <UsersGroup/>
                   Troops Page
                 </div>
               </Link>
