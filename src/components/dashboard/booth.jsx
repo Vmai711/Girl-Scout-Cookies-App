@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/authContext';
 import { useNavigate } from 'react-router-dom';
-import { saveReservation } from '../../firebase/firestore';
+import { saveReservation, fetchLocations, saveLocation } from '../../firebase/firestore';
+import { useUserRole } from '../../firebase/roleUtils';
 
 import Header from "../header";
 import SideBar from "../sidebar/sidebar";
@@ -10,19 +11,62 @@ const Booth = () => {
     const navigate = useNavigate();
     
     // Get logged-in user's email
-    const { currentUser } = useAuth(); 
+    const { currentUser } = useAuth();
+    const role = useUserRole();
     
     const [girlName, setGirlName] = useState('');
     const [parentName, setParentName] = useState('');
+    const [boothLocations, setBoothLocations] = useState([]);
     const [boothLocation, setBoothLocation] = useState('');
+    const [nameLocation, setNameLocation] = useState('');
+    const [addressLocation, setAddressLocation] = useState('');
     const [startingTime, setStartTime] = useState('');
     const [date, setDate] = useState("");
     const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
 
     // Should be able to add locations (Troop Leader and Cookie Managers)
-    const BoothLocations = [
-        'Walmart', 'Kroger', 'Movie Theater', 'Store'
-    ];
+    useEffect(() => {
+        const getLocations = async () => {
+            try {
+                const locations = await fetchLocations();  // Fetch the locations from Firebase
+                console.log('Fetched locations:', locations);  // Log locations to see what is returned
+                setBoothLocations(locations);  // Update the state with fetched locations
+            } catch (error) {
+                console.error("Error fetching locations:", error);
+            }
+        };
+    
+        getLocations();
+    }, []);
+
+
+    const handleAddLocation = async () => {
+        if (nameLocation && addressLocation && !boothLocations.some(location => location.nameLocation === nameLocation)) {
+            const newLocation = { nameLocation, addressLocation };
+            setBoothLocations(prevLocations => [...prevLocations, newLocation]); // Add to the list
+            setBoothLocation(newLocation); // Set the current booth location to the new location
+            setNameLocation(''); // Clear name input
+            setAddressLocation(''); // Clear address input
+    
+            const locationData = {
+                nameLocation,
+                addressLocation,
+            };
+    
+            try {
+                const locationId = await saveLocation(locationData);  // Save to Firestore
+                alert(`Location ${nameLocation} at ${addressLocation} has been saved successfully! (ID: ${locationId})`);
+            } catch (error) {
+                console.error("Error saving location:", error);
+                alert("Failed to save location. Please try again.");
+            }
+        } else {
+            alert("Please enter a valid location name and address, or the location already exists.");
+        }
+    };
+
+
+    
 
     const generateTimeSlots = (interval, startHour, endHour) => {
     let times = [];
@@ -125,22 +169,62 @@ const Booth = () => {
                             className="w-full p-2 border rounded"
                         />
                     </div>
-
+                    
                     {/* Booth Location */}
                     <div className="mb-4">
                         <label className="block font-semibold">Booth Location:</label>
                         <select
-                            type="text"
-                            value={boothLocation}
-                            onChange={(e) => setBoothLocation(e.target.value)}
-                            required
-                            className="w-full p-2 border rounded"
-                        >
+                        value={boothLocation}
+                        onChange={(e) => setBoothLocation(e.target.value)}
+                        required
+                        className="w-full p-2 border rounded"
+                    >
                         <option value="">Select Location</option>
-                            {BoothLocations.map((booth, index) => (
-                                <option key={index} value={booth}>{booth}</option>
-                            ))}
-                        </select>
+                        {boothLocations.length > 0 ? (
+                            boothLocations.map((booth, index) => (
+                                <option key={booth.id} value={booth.id}>
+                                    {booth.nameLocation} - {booth.addressLocation}
+                                </option>
+                            ))
+                        ) : (
+                            <option value="" disabled>No Locations Available</option>
+                        )}
+                        {/* Show "Add Location" option only for admins or troop leaders */}
+                        {(role === 'admin' || role === 'cookie-manager' || role === 'troop-leader') && (
+                            <option value="Add Location">Add Location</option>
+                        )}
+                    </select>
+
+
+                    
+                        {/* Show input fields only when "Add Location" is selected */}
+                        {boothLocation === 'Add Location' && (role === 'admin' || role === 'cookie-manager'|| role === 'troop-leader') && (
+                            <div className="mt-2">
+                                {/* Name Input */}
+                                <input
+                                    type="text"
+                                    value={nameLocation}
+                                    onChange={(e) => setNameLocation(e.target.value)}
+                                    placeholder="Enter Location Name"
+                                    className="w-full p-2 border rounded mb-2"
+                                />
+                                {/* Address Input */}
+                                <input
+                                    type="text"
+                                    value={addressLocation}
+                                    onChange={(e) => setAddressLocation(e.target.value)}
+                                    placeholder="Enter Location Address"
+                                    className="w-full p-2 border rounded"
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={handleAddLocation}
+                                    className="mt-2 p-2 bg-blue-500 text-white rounded"
+                                >
+                                    Add Location
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Schedule Time */}

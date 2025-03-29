@@ -28,18 +28,45 @@ export const fetchOrders = async () => {
     }
 };
 
-// Save a reservation to Firestore
+// Save reservation to Firestore
 export const saveReservation = async (boothData) => {
     try {
         console.log("Saving booth reservation:", boothData); // Log data before saving
         const docRef = await addDoc(collection(db, 'reservations'), {
             ...boothData,
-            timestamp: serverTimestamp() // Adds a timestamp for order tracking
+            timestamp: serverTimestamp() // Adds a timestamp for reservation
         });
         console.log("Booth reserved successfully with ID:", docRef.id);
         return docRef.id;
     } catch (error) {
         console.error('Error saving reservation:', error);
+        throw error;
+    }
+};
+
+// Save location to Firestore
+export const saveLocation = async (locationData) => {
+    try {
+        console.log("Saving new location:", locationData); // Log data before saving
+        const docRef = await addDoc(collection(db, 'locations'), {
+            ...locationData
+        });
+        console.log("Location saved successfully with ID:", docRef.id);
+        return docRef.id;
+    } catch (error) {
+        console.error('Error saving location:', error);
+        throw error;
+    }
+};
+
+export const fetchLocations = async () => {
+    try {
+        const locationCollection = collection(db, "locations");
+        const snapshot = await getDocs(locationCollection);
+        const locations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return locations;
+    } catch (error) {
+        console.error("Error fetching locations:", error);
         throw error;
     }
 };
