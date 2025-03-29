@@ -139,13 +139,15 @@ const Cookies = () => {
       <div className="w-full h-fit sm:ml-64">
         <Header page={"Cookies"}/>
         <main className="mt-[3.5rem] p-8">
-          <div className="bg-white max-w-6xl mx-auto p-6 rounded-md shadow-md">
+          <div className="bg-white w-full mx-auto p-6 rounded-md shadow-md">
             <h1 className="text-3xl font-bold mb-6 text-center">Manage Cookies</h1>
 
             {role === "cookie-manager" && (
               <div className="flex justify-center mb-4">
                 <button
-                  onClick={() => setShowEditButtons(!showEditButtons)}
+                  onClick={() => {
+                    setShowEditButtons(!showEditButtons)
+                    setEditingCookie()}} 
                   className="bg-blue-500 text-white px-4 py-2 rounded mr-4"
                 >
                   {showEditButtons ? "Cancel" : "Edit Cookies"}
