@@ -3,6 +3,9 @@ import { db } from "../../firebase/firebase";
 import { getDoc, doc, updateDoc, deleteField } from "firebase/firestore";
 import { useUserRole } from "../../firebase/roleUtils";
 
+import { storage } from "../../firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 import Header from "../header";
 import SideBar from "../sidebar/sidebar";
 
@@ -14,6 +17,8 @@ const Cookies = () => {
   const [newCookie, setNewCookie] = useState({ name: "", imageUrl: "", description: "" });
   const [showAddForm, setShowAddForm] = useState(false);
   const role = useUserRole();
+
+  const [imageUpload, setImageUpload] = useState(null);
 
   useEffect(() => {
     const fetchCookies = async () => {
@@ -38,7 +43,7 @@ const Cookies = () => {
     };
 
     fetchCookies();
-  }, []);
+  }, [cookies]);
 
   const handleRemoveCookie = async () => {
     if (cookieToRemove) {
@@ -122,16 +127,45 @@ const Cookies = () => {
       return;
     }
 
+    let imgURL = "";
+
+    if(imageUpload) {
+      imgURL = await uploadImage();
+      if(!imgURL) {
+        alert("Image upload failed. Please try again!");
+        return;
+      }
+    }
+
     try {
       const docRef = doc(db, "cookieTypes", "Cookie Types Config");
-      await updateDoc(docRef, { [newCookie.name]: [newCookie.imageUrl, newCookie.description, newCookie.name] });
-      setCookies([...cookies, { ...newCookie, editableName: newCookie.name }]);
+      // await updateDoc(docRef, { [newCookie.name]: [newCookie.imageUrl, newCookie.description, newCookie.name] });
+      await updateDoc(docRef, { [newCookie.name]: [imgURL, newCookie.description, newCookie.name] });
+      // setCookies([...cookies, { ...newCookie, editableName: newCookie.name }]);
+      setCookies([...cookies, { ...newCookie, imgURL }]);
       setNewCookie({ name: "", imageUrl: "", description: "" });
+      setImageUpload(null);
       setShowAddForm(false);
     } catch (error) {
       console.error("Error adding new cookie:", error);
     }
   };
+
+  // const imageListRef = ref(storage, "images/cookies/")
+  const uploadImage =  async () => {
+    if(imageUpload === null) return;
+
+    const imageRef = ref(storage, `images/cookies/${imageUpload.name}`);
+    try {
+      await uploadBytes(imageRef, imageUpload)
+      console.log("Uploaded img")
+      return await getDownloadURL(imageRef)
+    } catch (error) {
+      console.error("Error uploading img", error)
+      return null
+    }
+  }
+
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
@@ -180,13 +214,17 @@ const Cookies = () => {
                   placeholder="Cookie Name"
                   className="w-full p-2 border rounded mb-2"
                 />
-                <input
+                <input 
+                  type="file" 
+                  onChange={(event) => {setImageUpload(event.target.files[0])}}
+                />
+                {/* <input
                   type="text"
                   value={newCookie.imageUrl}
                   onChange={(e) => setNewCookie({ ...newCookie, imageUrl: e.target.value })}
                   placeholder="Image URL"
                   className="w-full p-2 border rounded mb-2"
-                />
+                /> */}
                 <textarea
                   value={newCookie.description}
                   onChange={(e) => setNewCookie({ ...newCookie, description: e.target.value })}
