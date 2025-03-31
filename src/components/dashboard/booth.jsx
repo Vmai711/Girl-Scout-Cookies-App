@@ -66,7 +66,6 @@ const Booth = () => {
     };
 
 
-    
 
     const generateTimeSlots = (interval, startHour, endHour) => {
     let times = [];
@@ -90,38 +89,43 @@ const Booth = () => {
     
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+    
+        // Make sure 'acceptedResponsibility' is checked before proceeding
         if (!acceptedResponsibility) {
             alert("You must accept financial responsibility before submitting.");
             return;
         }
-
-        //Data that will be sent to the firebase collections database
+    
+        // Data to be sent to the firebase collections database
         const boothData = {
             email: currentUser?.email || '',
             girlName,
             parentName,
-            boothLocation,
+            boothLocation: `${boothLocation.nameLocation} - ${boothLocation.addressLocation}`,
             startingTime,
             date,
             acceptedResponsibility,
             timestamp: new Date()
         };
-
+        
+        console.log("Booth Data before saving:", boothData); // Debugging log
+        
+    
         try {
             const boothId = await saveReservation(boothData);  
-            alert(`Booth has been reserved successfully! (ID: ${boothId}) ${boothLocation} has been reserved for ${startingTime} on ${date}`);
-            
+            alert(`Booth has been reserved successfully! (ID: ${boothId}) ${boothLocation.nameLocation} at ${boothLocation.addressLocation} has been reserved for ${startingTime} on ${date}`);
+    
+            localStorage.setItem("boothData", JSON.stringify(boothData)); 
             // Redirect only if the order is successfully submitted
-            navigate('/home');
+            navigate("/boothsummary", { state: boothData });
+         
         } catch (error) {
             // Stay on the page by not calling `navigate`
             console.error("Error reserving booth:", error);
             alert("There was an error reserving the booth. Please try again.");
         }
-        // Redirect to home page
-        navigate('/home');
     };
+    
 
     return (
         <div className="bg-custom-light-gray flex min-h-screen">
@@ -174,29 +178,34 @@ const Booth = () => {
                     <div className="mb-4">
                         <label className="block font-semibold">Booth Location:</label>
                         <select
-                        value={boothLocation}
-                        onChange={(e) => setBoothLocation(e.target.value)}
-                        required
-                        className="w-full p-2 border rounded"
-                    >
-                        <option value="">Select Location</option>
-                        {boothLocations.length > 0 ? (
-                            boothLocations.map((booth, index) => (
-                                <option key={booth.id} value={booth.id}>
-                                    {booth.nameLocation} - {booth.addressLocation}
-                                </option>
-                            ))
-                        ) : (
-                            <option value="" disabled>No Locations Available</option>
-                        )}
-                        {/* Show "Add Location" option only for admins or troop leaders */}
-                        {(role === 'admin' || role === 'cookie-manager' || role === 'troop-leader') && (
-                            <option value="Add Location">Add Location</option>
-                        )}
-                    </select>
+                            value={boothLocation.nameLocation || ''} // This will display the nameLocation in the select box
+                            onChange={(e) => {
+                                const selectedLocation = boothLocations.find(
+                                    (booth) => booth.nameLocation === e.target.value
+                                );
+                                if (selectedLocation) {
+                                    // Update boothLocation state with both nameLocation and addressLocation
+                                    setBoothLocation({
+                                        nameLocation: selectedLocation.nameLocation,
+                                        addressLocation: selectedLocation.addressLocation
+                                    });
+                                }
+                            }}
+                            required
+                            className="w-full p-2 border rounded"
+                        >
+                            <option value="">Select Location</option>
+                            {boothLocations.length > 0 ? (
+                                boothLocations.map((booth) => (
+                                    <option key={booth.id} value={booth.nameLocation}>
+                                        {booth.nameLocation} - {booth.addressLocation}
+                                    </option>
+                                ))
+                            ) : (
+                                <option value="" disabled>No Locations Available</option>
+                            )}
+                        </select>
 
-
-                    
                         {/* Show input fields only when "Add Location" is selected */}
                         {boothLocation === 'Add Location' && (role === 'admin' || role === 'cookie-manager'|| role === 'troop-leader') && (
                             <div className="mt-2">
@@ -274,7 +283,7 @@ const Booth = () => {
 
                     {/* Submit Button */}
                     <button 
-                        type="submit" 
+                        type="submit"
                         className={`w-full text-white p-2 rounded transition ${acceptedResponsibility ? 'bg-green-500 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
                         disabled={!acceptedResponsibility}
                     >

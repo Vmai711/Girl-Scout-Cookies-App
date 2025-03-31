@@ -74,6 +74,8 @@ const Order = () => {
             console.error("Error submitting order:", error);
             alert("There was an error submitting your order. Please try again.");
         }
+
+
     };
 
     return (
