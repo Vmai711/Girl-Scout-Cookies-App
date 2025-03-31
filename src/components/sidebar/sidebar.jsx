@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUserRole } from "../../firebase/roleUtils"; 
 
@@ -15,9 +15,16 @@ import { Store } from "flowbite-react-icons/outline";
 import { Cart } from "flowbite-react-icons/outline";
 import { UsersGroup } from "flowbite-react-icons/outline";
 
-
 const SideBar = () => {
   const role = useUserRole();
+  const [storedRole, setStoredRole] = useState(localStorage.getItem("userRole") || null);
+
+  useEffect(() => {
+    if (role) {
+      setStoredRole(role);
+      localStorage.setItem("userRole", role);
+    }
+  }, [role]);
 
   return (
       <div>
@@ -28,11 +35,11 @@ const SideBar = () => {
               <Link
                 to="/dashboard"
                 className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
-                >
-                  <div className="flex gap-3">
-                    <Grid/>
-                    Dashboard Page
-                  </div>
+              >
+                <div className="flex gap-3">
+                  <Grid/>
+                  Dashboard Page
+                </div>
               </Link>
 
               <Link
@@ -105,8 +112,7 @@ const SideBar = () => {
                 </div>
               </Link>
 
-              {/* Conditionally render Troops Page link based on role */}
-              {role === "cookie-manager" || role === "admin" ? (
+              {(storedRole === "cookie-manager" || storedRole === "admin") && (
               <Link 
                 to="/troops" 
                 className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
@@ -116,7 +122,7 @@ const SideBar = () => {
                   Troops Page
                 </div>
               </Link>
-              ) : null}
+              )}
 
               <Link
                 to="/order_form"
