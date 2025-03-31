@@ -6,20 +6,10 @@ import SideBar from "../sidebar/sidebar";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { PieChart, Pie, Legend } from "recharts";
 
-// Define a color pool with enough unique colors
 const colorPool = [
-  "#FFB6C1", 
-  "#FFD700", 
-  "#87CEEB", 
-  "#FF69B4",
-  "#98FB98", 
-  "#FFA07A", 
-  "#8A2BE2", 
-  "#FF6347", 
-  "#00FA9A", 
-  "#D2691E",
-  "#9ACD32", 
-  "#FF4500", 
+  "#FFB6C1", "#FFD700", "#87CEEB", "#FF69B4",
+  "#98FB98", "#FFA07A", "#8A2BE2", "#FF6347",
+  "#00FA9A", "#D2691E", "#9ACD32", "#FF4500"
 ];
 
 const Dashboard = () => {
@@ -28,7 +18,7 @@ const Dashboard = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [activeMonth, setActiveMonth] = useState(null);
-  const [cookieColors, setCookieColors] = useState({}); // Object to store colors for each cookie type
+  const [cookieColors, setCookieColors] = useState({});
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -46,13 +36,11 @@ const Dashboard = () => {
       const cookieData = snapshot.docs.map((doc) => doc.data().Types).flat();
 
       const colors = {};
-
-      // Assign colors to cookie types, cycling through the color pool
       cookieData.forEach((cookie, index) => {
         colors[cookie] = colorPool[index % colorPool.length]; 
       });
 
-      setCookieColors(colors); // Set the color mapping for cookie types
+      setCookieColors(colors); 
     };
 
     fetchOrders();
@@ -74,7 +62,7 @@ const Dashboard = () => {
 
       setFilteredOrders(filtered);
     } else {
-      setFilteredOrders(orders); // If no date is set, show all orders
+      setFilteredOrders(orders);
     }
   }, [startDate, endDate, orders]);
 
@@ -122,7 +110,16 @@ const Dashboard = () => {
           });
         });
     }
-    return Object.keys(cookieSales).map((cookie) => ({ name: cookie, value: cookieSales[cookie] }));
+
+    const salesArray = Object.keys(cookieSales).map((cookie, index) => {
+      if (!cookieColors[cookie]) {
+        const newColor = colorPool[index % colorPool.length];
+        setCookieColors((prevColors) => ({ ...prevColors, [cookie]: newColor }));
+      }
+      return { name: cookie, value: cookieSales[cookie] };
+    });
+
+    return salesArray;
   };
 
   return (
@@ -141,7 +138,7 @@ const Dashboard = () => {
             {/* Reset Pie Chart Button */}
             <div className="flex justify-center mb-4">
               <button
-                onClick={() => setActiveMonth(null)} // Reset the active month to null
+                onClick={() => setActiveMonth(null)}
                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
               >
                 Reset Pie Chart
@@ -156,10 +153,9 @@ const Dashboard = () => {
                     data={processSalesData()}
                     onClick={(e) => {
                       if (e && e.activePayload && e.activePayload.length > 0) {
-                        const selectedMonth = e.activePayload[0].payload.name;
-                        setActiveMonth(selectedMonth);
+                        setActiveMonth(e.activePayload[0].payload.name);
                       } else {
-                        setActiveMonth(null); // if clicked outside, reset to total sales
+                        setActiveMonth(null);
                       }
                     }}
                   >
@@ -173,7 +169,7 @@ const Dashboard = () => {
                   <PieChart>
                     <Pie data={processCookieSales(activeMonth)} dataKey="value" nameKey="name" outerRadius={100}>
                       {processCookieSales(activeMonth).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={cookieColors[entry.name] || "#8884d8"} />
+                        <Cell key={`cell-${index}`} fill={cookieColors[entry.name] || colorPool[index % colorPool.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
