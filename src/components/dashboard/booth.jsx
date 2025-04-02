@@ -178,17 +178,21 @@ const Booth = () => {
                     <div className="mb-4">
                         <label className="block font-semibold">Booth Location:</label>
                         <select
-                            value={boothLocation.nameLocation || ''} // This will display the nameLocation in the select box
+                            value={boothLocation.nameLocation || ''} // Displays selected location
                             onChange={(e) => {
-                                const selectedLocation = boothLocations.find(
-                                    (booth) => booth.nameLocation === e.target.value
-                                );
-                                if (selectedLocation) {
-                                    // Update boothLocation state with both nameLocation and addressLocation
-                                    setBoothLocation({
-                                        nameLocation: selectedLocation.nameLocation,
-                                        addressLocation: selectedLocation.addressLocation
-                                    });
+                                const selectedValue = e.target.value;
+                                if (selectedValue === "Add Location") {
+                                    setBoothLocation({ nameLocation: "Add Location", addressLocation: "" });
+                                } else {
+                                    const selectedLocation = boothLocations.find(
+                                        (booth) => booth.nameLocation === selectedValue
+                                    );
+                                    if (selectedLocation) {
+                                        setBoothLocation({
+                                            nameLocation: selectedLocation.nameLocation,
+                                            addressLocation: selectedLocation.addressLocation
+                                        });
+                                    }
                                 }
                             }}
                             required
@@ -204,12 +208,15 @@ const Booth = () => {
                             ) : (
                                 <option value="" disabled>No Locations Available</option>
                             )}
+                            {(role === 'admin' || role === 'cookie-manager' || role === 'troop-leader') && (
+                                <option value="Add Location">Add Location</option>
+                            )}
                         </select>
-
+                    
                         {/* Show input fields only when "Add Location" is selected */}
-                        {boothLocation === 'Add Location' && (role === 'admin' || role === 'cookie-manager'|| role === 'troop-leader') && (
+                        {boothLocation.nameLocation === "Add Location" && (
                             <div className="mt-2">
-                                {/* Name Input */}
+                                <label className="block font-semibold">Location Name:</label>
                                 <input
                                     type="text"
                                     value={nameLocation}
@@ -217,7 +224,7 @@ const Booth = () => {
                                     placeholder="Enter Location Name"
                                     className="w-full p-2 border rounded mb-2"
                                 />
-                                {/* Address Input */}
+                                <label className="block font-semibold">Location Address:</label>
                                 <input
                                     type="text"
                                     value={addressLocation}
@@ -235,6 +242,7 @@ const Booth = () => {
                             </div>
                         )}
                     </div>
+
 
                     {/* Schedule Time */}
                     <div className="mb-4">

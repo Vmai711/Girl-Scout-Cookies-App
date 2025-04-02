@@ -21,6 +21,7 @@ import Booth from "./components/dashboard/booth";
 
 //Summary Components
 import BoothSummary from "./components/summary/boothsummary";
+import OrderSummary from "./components/summary/ordersummary";
 
 import { AuthProvider } from "./contexts/authContext";
 import { useRoutes } from "react-router-dom";
@@ -45,6 +46,7 @@ function App() {
     { path: "/order_form", element: <Order /> },
     { path: "/booth", element: <Booth /> },
     { path: "/boothsummary", element: <BoothSummary /> },
+    { path: "/ordersummary", element: <OrderSummary /> },
   ];
 
   let routesElement = useRoutes(routesArray);

@@ -21,6 +21,7 @@ const BoothSummary = () => {
             <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
               <div className="bg-white p-6 rounded-md shadow-md">
                 <h1 className="text-3xl font-bold mb-6 text-center">Booth Summary</h1>
+                <h2 className="text-2xl font mb-6 text-center">You can check this reservation in the Reservations Page </h2>
                 <div className="w-full p-2">
                     <p>Email: {boothData.email}</p>
                 </div>
@@ -42,9 +43,13 @@ const BoothSummary = () => {
                 </div>
 
                 <div className="w-full p-2">
-                    <p>Date: {boothData.date}</p>
+                    <p>Date: {new Date(new Date(boothData.date).setDate(new Date(boothData.date).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" })}</p>
                 </div> 
-
+                
+                <div className="w-full p-2">
+                    <p>Time of Reservation: {new Date(boothData.timestamp).toLocaleString()}</p>
+                </div> 
+                
               </div>
             </main>
           </div>

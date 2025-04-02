@@ -69,7 +69,8 @@ const Order = () => {
         try {
             const orderId = await saveOrder(orderData);
             alert(`Order submitted successfully! Your Order ID is: ${orderId}`);
-            navigate(-1);
+            localStorage.setItem("orderData", orderData);
+            navigate("/ordersummary", { state: orderData });
         } catch (error) {
             console.error("Error submitting order:", error);
             alert("There was an error submitting your order. Please try again.");
