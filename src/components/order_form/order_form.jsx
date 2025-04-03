@@ -49,12 +49,12 @@ const Order = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         if (!acceptedResponsibility) {
             alert("You must accept financial responsibility before submitting.");
             return;
         }
-
+    
         const orderData = {
             email: currentUser?.email || '',
             girlName,
@@ -63,22 +63,19 @@ const Order = () => {
             pickupLocation,
             contactMethod,
             acceptedResponsibility,
-            timestamp: new Date()
         };
-
+    
         try {
-            const orderId = await saveOrder(orderData);
+            const orderId = await saveOrder(orderData, currentUser.uid); // Pass user ID
             alert(`Order submitted successfully! Your Order ID is: ${orderId}`);
-            localStorage.setItem("orderData", orderData);
+            localStorage.setItem("orderData", JSON.stringify(orderData));
             navigate("/ordersummary", { state: orderData });
         } catch (error) {
             console.error("Error submitting order:", error);
             alert("There was an error submitting your order. Please try again.");
         }
-
-
     };
-
+    
     return (
         <div className="bg-custom-light-gray flex min-h-screen">
             <SideBar />

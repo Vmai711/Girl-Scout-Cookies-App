@@ -1,21 +1,34 @@
 import { db } from './firebase'; // Ensure this correctly imports your Firebase setup
-import { collection, addDoc, serverTimestamp, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 
-// Function to save an order to Firestore
-export const saveOrder = async (orderData) => {
+/**
+ * Save an order to both the global 'orders' collection and the user's specific order collection.
+ */
+export const saveOrder = async (orderData, userId) => {
     try {
-        const docRef = await addDoc(collection(db, 'orders'), {
+        // Add order to global 'orders' collection
+        const globalOrderRef = await addDoc(collection(db, 'orders'), {
             ...orderData,
             timestamp: serverTimestamp() // Adds a timestamp for order tracking
         });
-        return docRef.id; // Returns the order ID
+
+        // Add order to user-specific 'orders' collection
+        const userOrderRef = doc(db, `users/${userId}/orders`, globalOrderRef.id);
+        await setDoc(userOrderRef, {
+            ...orderData,
+            timestamp: serverTimestamp() // Ensures the same timestamp format
+        });
+
+        return globalOrderRef.id; // Returns the order ID
     } catch (error) {
         console.error('Error saving order:', error);
         throw error;
     }
 };
 
-// Fetch orders from Firestore
+/**
+ * Fetch all orders from the global 'orders' collection.
+ */
 export const fetchOrders = async () => {
     try {
         const ordersCollection = collection(db, "orders");
@@ -28,13 +41,30 @@ export const fetchOrders = async () => {
     }
 };
 
-// Save reservation to Firestore
+/**
+ * Fetch orders for a specific user from their personal 'orders' collection.
+ */
+export const fetchUserOrders = async (userId) => {
+    try {
+        const userOrdersCollection = collection(db, `users/${userId}/orders`);
+        const snapshot = await getDocs(userOrdersCollection);
+        const userOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return userOrders;
+    } catch (error) {
+        console.error("Error fetching user orders:", error);
+        throw error;
+    }
+};
+
+/**
+ * Save a booth reservation to Firestore.
+ */
 export const saveReservation = async (boothData) => {
     try {
-        console.log("Saving booth reservation:", boothData); // Log data before saving
+        console.log("Saving booth reservation:", boothData);
         const docRef = await addDoc(collection(db, 'reservations'), {
             ...boothData,
-            timestamp: serverTimestamp() // Adds a timestamp for reservation
+            timestamp: serverTimestamp()
         });
         console.log("Booth reserved successfully with ID:", docRef.id);
         return docRef.id;
@@ -44,10 +74,12 @@ export const saveReservation = async (boothData) => {
     }
 };
 
-// Save location to Firestore
+/**
+ * Save a new location to Firestore.
+ */
 export const saveLocation = async (locationData) => {
     try {
-        console.log("Saving new location:", locationData); // Log data before saving
+        console.log("Saving new location:", locationData);
         const docRef = await addDoc(collection(db, 'locations'), {
             ...locationData
         });
@@ -59,6 +91,9 @@ export const saveLocation = async (locationData) => {
     }
 };
 
+/**
+ * Fetch all locations from Firestore.
+ */
 export const fetchLocations = async () => {
     try {
         const locationCollection = collection(db, "locations");
@@ -71,31 +106,33 @@ export const fetchLocations = async () => {
     }
 };
 
-// Fetch Cookie Types from Firestore
+/**
+ * Fetch cookie types from Firestore.
+ */
 export const fetchCookieTypes = async () => {
     try {
-      const docRef = doc(db, "cookieTypes", "Cookie Types Config"); // Reference to the config document
-      const docSnap = await getDoc(docRef);
-  
-      if (docSnap.exists()) {
-        return Object.keys(docSnap.data()); // Only return the cookie names
-      } else {
-        console.log("No cookie types found!");
-        return [];
-      }
-    } catch (error) {
-      console.error("Error fetching cookie types:", error);
-      return [];
-    }
-  };
+        const docRef = doc(db, "cookieTypes", "Cookie Types Config");
+        const docSnap = await getDoc(docRef);
 
-// Update Cookie Types in Firestore
+        if (docSnap.exists()) {
+            return Object.keys(docSnap.data()); // Only return the cookie names
+        } else {
+            console.log("No cookie types found!");
+            return [];
+        }
+    } catch (error) {
+        console.error("Error fetching cookie types:", error);
+        return [];
+    }
+};
+
+/**
+ * Update cookie types in Firestore.
+ */
 export const updateCookieTypes = async (updatedTypes) => {
     try {
         const docRef = doc(db, "cookieTypes", "Cookie Types Config");
-        await updateDoc(docRef, {
-            Types: updatedTypes, 
-        });
+        await updateDoc(docRef, { Types: updatedTypes });
         console.log("Cookie types updated successfully!");
     } catch (error) {
         console.error("Error updating cookie types:", error);
