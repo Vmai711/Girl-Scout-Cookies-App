@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useUserRole } from "../../firebase/roleUtils"; 
+import { useUserRole } from "../../firebase/roleUtils";
 
 import { Sidebar } from "flowbite-react";
+
+import { collection, onSnapshot } from "firebase/firestore";
+import { auth, db } from "../../firebase/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 // Icons
 import { Grid } from "flowbite-react-icons/outline";
@@ -18,6 +22,27 @@ import { UsersGroup } from "flowbite-react-icons/outline";
 const SideBar = () => {
   const role = useUserRole();
   const [storedRole, setStoredRole] = useState(localStorage.getItem("userRole") || null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+  const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    setUser(currentUser);
+  });
+  return () => unsubscribeAuth();
+}, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const messagesRef = collection(db, "messages");
+    const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
+      const unread = snapshot.docs.filter((doc) => {
+        const msg = doc.data();
+        return msg.recipientId === user.uid && msg.read === false;
+      });
+      setUnreadMessages(unread.length);
+    });
+    return () => unsubscribe();
+  }, [user]);
 
   useEffect(() => {
     if (role) {
@@ -96,9 +121,15 @@ const SideBar = () => {
                 to="/messages"
                 className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
-                <div className="flex gap-3">
-                  <Messages/>
+
+                <div className="flex gap-3 items-center relative">
+                  <Messages />
                   Message Page
+                  {unreadMessages > 0 && (
+                    <span className="absolute right-[-15px] bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full relative">
+                      {unreadMessages}
+                    </span>
+                  )}
                 </div>
               </Link>
 
@@ -123,8 +154,8 @@ const SideBar = () => {
               </Link>
 
               {(storedRole === "cookie-manager" || storedRole === "admin") && (
-              <Link 
-                to="/troops" 
+              <Link
+                to="/troops"
                 className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
                 <div className="flex gap-3">
