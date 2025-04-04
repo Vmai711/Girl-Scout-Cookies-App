@@ -18,6 +18,7 @@ import Messages from "./components/dashboard/messages";
 import Inventory from "./components/dashboard/inventory";
 import Order from "./components/order_form/order_form";
 import Booth from "./components/dashboard/booth";
+import Reservations from "./components/dashboard/reservations";
 
 //Summary Components
 import BoothSummary from "./components/summary/boothsummary";
@@ -47,6 +48,7 @@ function App() {
     { path: "/booth", element: <Booth /> },
     { path: "/boothsummary", element: <BoothSummary /> },
     { path: "/ordersummary", element: <OrderSummary /> },
+    { path: "/reservations", element: <Reservations /> },
   ];
 
   let routesElement = useRoutes(routesArray);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/authContext';
 import { useNavigate } from 'react-router-dom';
-import { saveOrder, fetchCookieTypes } from '../../firebase/firestore';
+import { saveOrder, fetchCookieTypes, fetchDeadlines, updateDeadlines } from '../../firebase/firestore';
+import { useUserRole } from '../../firebase/roleUtils';
 
 import Header from '../header';
 import SideBar from '../sidebar/sidebar';
@@ -9,6 +10,7 @@ import SideBar from '../sidebar/sidebar';
 const Order = () => {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
+    const role = useUserRole();
 
     const [girlName, setGirlName] = useState('');
     const [parentName, setParentName] = useState('');
@@ -17,6 +19,28 @@ const Order = () => {
     const [contactMethod, setContactMethod] = useState('');
     const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
     const [cookieTypes, setCookieTypes] = useState([]);
+
+    const [deadlines, setDeadlines] = useState({ preorderDeadline: null, orderDeadline: null });
+    const [editingDeadlines, setEditingDeadlines] = useState(false);    
+
+    // Fetch preorder and order deadlines from Firebase
+    useEffect(() => {
+        const getDeadlines = async () => {
+            try {
+                const data = await fetchDeadlines();
+                if (data) {
+                    setDeadlines({
+                        preorderDeadline: data.preorderDeadline?.toISOString().split("T")[0], 
+                        orderDeadline: data.orderDeadline?.toISOString().split("T")[0]
+                    });
+                }
+            } catch (err) {
+                console.error("Error fetching deadlines:", err);
+            }
+        };
+    
+        getDeadlines();
+    }, []);
 
     // Fetch the cookie types from Firestore when the component mounts
     useEffect(() => {
@@ -84,6 +108,64 @@ const Order = () => {
                 <main className="mt-[3.5rem] p-8">
                     <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
                         <h2 className="text-2xl font-bold mb-4">Girl Scout Cookie Order Form</h2>
+
+                        <div className="mb-6 p-4 border rounded bg-gray-50">
+                            <h3 className="font-bold mb-2">Important Deadlines</h3>
+                            {editingDeadlines ? (
+                                <>
+                                    <label className="block mb-2">Pre-Order Deadline:
+                                        <input
+                                            type="date"
+                                            value={deadlines.preorderDeadline}
+                                            onChange={(e) =>
+                                                setDeadlines({ ...deadlines, preorderDeadline: e.target.value })
+                                            }
+                                            className="block border p-1 mt-1"
+                                        />
+                                    </label>
+                                    <label className="block mb-2">Order Deadline:
+                                        <input
+                                            type="date"
+                                            value={deadlines.orderDeadline}
+                                            onChange={(e) =>
+                                                setDeadlines({ ...deadlines, orderDeadline: e.target.value })
+                                            }
+                                            className="block border p-1 mt-1"
+                                        />
+                                    </label>
+                                    <button
+                                        onClick={async () => {
+                                            await updateDeadlines(deadlines);
+                                            setEditingDeadlines(false);
+                                        }}
+                                        className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded mr-2"
+                                    >
+                                        Save
+                                    </button>
+                                    <button
+                                        onClick={() => setEditingDeadlines(false)}
+                                        className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
+                                    >
+                                        Cancel
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <p>Pre-Order Deadline: <strong>{deadlines.preorderDeadline}</strong></p>
+                                    <p>Order Deadline: <strong>{deadlines.orderDeadline}</strong></p>
+                                    {(role === 'admin' || role === 'cookie-manager' || role === 'troop-leader') && (
+                                        <button
+                                            onClick={() => setEditingDeadlines(true)}
+                                            className="mt-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
+                                        >
+                                            Edit Deadlines
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
+
+                        
                         <form onSubmit={handleSubmit}>
 
                             {/* Email (Autofilled) */}

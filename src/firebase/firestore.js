@@ -57,6 +57,33 @@ export const fetchUserOrders = async (userId) => {
 };
 
 /**
+ * Fetch deadlines
+ */
+export const fetchDeadlines = async () => {
+    const docRef = doc(db, "deadlines", "deadlines");
+    const snapshot = await getDoc(docRef);
+    if (snapshot.exists()) {
+        const data = snapshot.data();
+        return {
+            preorderDeadline: data.preorderDeadline?.toDate(), 
+            orderDeadline: data.orderDeadline?.toDate()
+        };
+    }
+    return null;
+};
+
+/**
+ * Update deadlines
+ */
+export const updateDeadlines = async (newDeadlines) => {
+    const docRef = doc(db, "deadlines", "deadlines");
+    await updateDoc(docRef, {
+        preorderDeadline: new Date(new Date(newDeadlines.preorderDeadline).setDate(new Date(newDeadlines.preorderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" }),
+        orderDeadline: new Date(new Date(newDeadlines.orderDeadline).setDate(new Date(newDeadlines.orderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" })
+    });
+};
+
+/**
  * Save a booth reservation to Firestore.
  */
 export const saveReservation = async (boothData) => {
@@ -70,6 +97,21 @@ export const saveReservation = async (boothData) => {
         return docRef.id;
     } catch (error) {
         console.error('Error saving reservation:', error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch user's reservations from Firestore.
+ */
+export const fetchReservations = async () => {
+    try {
+        const reservationsCollection = collection(db, "reservations");
+        const snapshot = await getDocs(reservationsCollection);
+        const reservations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return reservations;
+    } catch (error) {
+        console.error("Error fetching locations:", error);
         throw error;
     }
 };

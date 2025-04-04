@@ -33,7 +33,7 @@ const OrderManagementTable = ({orders}) => {
                         <Table.Cell>#123456</Table.Cell>
                         <Table.Cell>{order.girlName}</Table.Cell>
                         <Table.Cell>$16.00</Table.Cell>
-                        <Table.Cell>3/23/2025</Table.Cell>
+                        <Table.Cell>{order.timestamp ? new Date(order.timestamp.toDate()).toLocaleDateString() : "N/A"}</Table.Cell>
                         <Table.Cell>
                             <Select id="Status" required>
                                 <option value="cancelled">Cancelled</option>

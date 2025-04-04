@@ -53,6 +53,16 @@ const SideBar = () => {
               </Link>
 
               <Link
+                to="/reservations"
+                className="block text-center hover:text-black py-3 mb-2 rounded-md hover:bg-custom-dark-green p-2 text-gray-600"
+              >
+                <div className="flex gap-3">
+                  <Store/>
+                  Reservations Page
+                </div>
+              </Link>
+
+              <Link
                 to="/inventory"
                 className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
               >
