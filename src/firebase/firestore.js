@@ -60,8 +60,8 @@ export const fetchUserOrders = async (userId) => {
  * Fetch deadlines
  */
 export const fetchDeadlines = async () => {
-    const docRef = doc(db, "deadlines", "deadlines");
-    const snapshot = await getDoc(docRef);
+    const deadlinecollection = collection(db, "deadlines", "deadlines");
+    const snapshot = await getDoc(deadlinecollection);
     if (snapshot.exists()) {
         const data = snapshot.data();
         return {
@@ -76,8 +76,8 @@ export const fetchDeadlines = async () => {
  * Update deadlines
  */
 export const updateDeadlines = async (newDeadlines) => {
-    const docRef = doc(db, "deadlines", "deadlines");
-    await updateDoc(docRef, {
+    const deadlinecollection = collection(db, "deadlines", "deadlines");
+    await updateDoc(deadlinecollection, {
         preorderDeadline: new Date(new Date(newDeadlines.preorderDeadline).setDate(new Date(newDeadlines.preorderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" }),
         orderDeadline: new Date(new Date(newDeadlines.orderDeadline).setDate(new Date(newDeadlines.orderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" })
     });
