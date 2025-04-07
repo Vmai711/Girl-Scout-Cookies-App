@@ -3,37 +3,45 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/authContext';
 import { useState, useEffect } from 'react';
 
-
 export const fetchUserRole = async (uid) => {
     try {
         const userDoc = await getDoc(doc(db, 'users', uid));
+
         if (userDoc.exists()) {
-            return userDoc.data().role; 
+            const data = userDoc.data();
+            
+            // Ensure role is always an array (Does not work)
+            const roles = Array.isArray(data.role) ? data.role : [data.role];
+            
+            return {
+                roles: roles || [],
+                currentRole: data.currentRole || null,  
+            };
         } else {
             console.error("No such user document!");
-            return null; // Return null if no role is found
+            return { roles: [], currentRole: null };
         }
     } catch (error) {
         console.error("Error fetching user role:", error);
-        return null;
+        return { roles: [], currentRole: null };
     }
 };
 
-// Custom hook to use user role in components
+
 export const useUserRole = () => {
     const { currentUser } = useAuth(); 
-
-    const [role, setRole] = useState(null);
+    const [userRole, setUserRole] = useState({ roles: [], currentRole: null }); 
 
     useEffect(() => {
         if (currentUser) {
             const fetchRole = async () => {
-                const userRole = await fetchUserRole(currentUser.uid);
-                setRole(userRole);
+                const roleData = await fetchUserRole(currentUser.uid);
+                setUserRole(roleData);
             };
+
             fetchRole();
         }
     }, [currentUser]);
 
-    return role;
+    return userRole;
 };

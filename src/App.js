@@ -19,6 +19,7 @@ import Inventory from "./components/dashboard/inventory";
 import Order from "./components/order_form/order_form";
 import Booth from "./components/dashboard/booth";
 import Reservations from "./components/dashboard/reservations";
+import RoleChange from "./components/dashboard/tempRoleChange";
 
 //Summary Components
 import BoothSummary from "./components/summary/boothsummary";
@@ -49,6 +50,7 @@ function App() {
     { path: "/boothsummary", element: <BoothSummary /> },
     { path: "/ordersummary", element: <OrderSummary /> },
     { path: "/reservations", element: <Reservations /> },
+    { path: "/rolechange", element: <RoleChange /> },
   ];
 
   let routesElement = useRoutes(routesArray);

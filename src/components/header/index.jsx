@@ -9,7 +9,7 @@ import { Avatar, Dropdown, Navbar } from "flowbite-react";
 const Header = ({ page }) => {
     const navigate = useNavigate();
     const { userLoggedIn, currentUser } = useAuth();
-    const userRole = useUserRole(); 
+    const { currentRole } = useUserRole(); // Destructure both roles and mainRole
 
     return (
         <Navbar fluid rounded className='fixed top-0 w-[calc(100%-16rem)] z-50'>
@@ -27,12 +27,11 @@ const Header = ({ page }) => {
                         <Dropdown.Header>
                             <span className="block text-sm">{currentUser?.displayName || 'User'}</span>
                             <span className="block truncate text-sm font-medium">{currentUser?.email}</span>
-                            <span className="block text-xs text-gray-500">{userRole || 'Loading role...'}</span> {/* Display user role */}
+                            {/* Display the mainRole (current role) */}
+                            <span className="block text-xs text-gray-500">{currentRole || 'Loading role...'}</span> 
                         </Dropdown.Header>
                         <Dropdown.Item>Settings</Dropdown.Item>
                         <Dropdown.Divider />
-                        {/* <Dropdown.Item>Sign out</Dropdown.Item> */}
-                        {/* Might have to find an alternative way to do this. Could cause potential issues */}
                         <Dropdown.Item>
                             {
                                 userLoggedIn

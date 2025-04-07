@@ -31,7 +31,7 @@ const Register = () => {
         if (!isRegistering) {
             setIsRegistering(true)
             try {
-                await doCreateUserWithEmailAndPassword(email, password, 'parent-scout')
+                await doCreateUserWithEmailAndPassword(email, password, ['parent-scout']); 
                 navigate('/home') // Redirect user on successful registration
             } catch (error) {
                 setIsRegistering(false)

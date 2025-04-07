@@ -10,25 +10,22 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-// export const doCreateUserWithEmailAndPassword = async (email, password) => {
-//   return createUserWithEmailAndPassword(auth, email, password);
-// };
-
 export const doCreateUserWithEmailAndPassword = async (email, password, role) => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
-  // Store user data in Firestore
+  const userRoles = Array.isArray(role) ? role : [role];
+
   await setDoc(doc(db, "users", user.uid), {
       uid: user.uid,
       email,
-      role, // Store role in Firestore
+      role: userRoles,
+      currentRole: userRoles[0],
       createdAt: new Date()
   });
 
   return user;
 };
-
 
 export const doSignInWithEmailAndPassword = (email, password) => {
   return signInWithEmailAndPassword(auth, email, password);
@@ -41,17 +38,17 @@ export const doSignInWithGoogle = async () => {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Check if user already exists in Firestore
     const userDocRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
 
-    // If user does not exist in Firestore, add them with default role
     if (!userDoc.exists()) {
+      const userRoles = ["parent-scout"];
       await setDoc(userDocRef, {
-        uid: user.uid, 
+        uid: user.uid,
         email: user.email,
-        role: "Parent/Scout", // Default role
-        createdAt: new Date(), 
+        role: userRoles,
+        currentRole: userRoles[0],
+        createdAt: new Date(),
       });
     }
 

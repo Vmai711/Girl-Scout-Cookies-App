@@ -16,7 +16,7 @@ const Cookies = () => {
   const [showEditButtons, setShowEditButtons] = useState(false);
   const [newCookie, setNewCookie] = useState({ name: "", imageUrl: "", description: "" });
   const [showAddForm, setShowAddForm] = useState(false);
-  const role = useUserRole();
+  const { currentRole } = useUserRole(); 
 
   const [imageUpload, setImageUpload] = useState(null);
 
@@ -100,7 +100,7 @@ const Cookies = () => {
           ],
         });
         
-        // Immediately update the local state to reflect the change
+        // Updates local state
         setCookies(cookies.map(cookie =>
           cookie.name === editingCookie.name
             ? { ...cookie, imageUrl: editingCookie.imageUrl, description: editingCookie.description }
@@ -139,9 +139,7 @@ const Cookies = () => {
 
     try {
       const docRef = doc(db, "cookieTypes", "Cookie Types Config");
-      // await updateDoc(docRef, { [newCookie.name]: [newCookie.imageUrl, newCookie.description, newCookie.name] });
       await updateDoc(docRef, { [newCookie.name]: [imgURL, newCookie.description, newCookie.name] });
-      // setCookies([...cookies, { ...newCookie, editableName: newCookie.name }]);
       setCookies([...cookies, { ...newCookie, imgURL }]);
       setNewCookie({ name: "", imageUrl: "", description: "" });
       setImageUpload(null);
@@ -151,8 +149,7 @@ const Cookies = () => {
     }
   };
 
-  // const imageListRef = ref(storage, "images/cookies/")
-  const uploadImage =  async () => {
+  const uploadImage = async () => {
     if(imageUpload === null) return;
 
     const imageRef = ref(storage, `images/cookies/${imageUpload.name}`);
@@ -164,19 +161,18 @@ const Cookies = () => {
       console.error("Error uploading img", error)
       return null
     }
-  }
-
+  };
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar />
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Cookies"}/>
+        <Header page={"Cookies"} />
         <main className="mt-[3.5rem] p-8">
           <div className="bg-white w-full mx-auto p-6 rounded-md shadow-md">
             <h1 className="text-3xl font-bold mb-6 text-center">Manage Cookies</h1>
 
-            {role === "cookie-manager" && (
+            {currentRole === "cookie-manager" && (  
               <div className="flex justify-center mb-4">
                 <button
                   onClick={() => {
@@ -218,13 +214,6 @@ const Cookies = () => {
                   type="file" 
                   onChange={(event) => {setImageUpload(event.target.files[0])}}
                 />
-                {/* <input
-                  type="text"
-                  value={newCookie.imageUrl}
-                  onChange={(e) => setNewCookie({ ...newCookie, imageUrl: e.target.value })}
-                  placeholder="Image URL"
-                  className="w-full p-2 border rounded mb-2"
-                /> */}
                 <textarea
                   value={newCookie.description}
                   onChange={(e) => setNewCookie({ ...newCookie, description: e.target.value })}
@@ -247,7 +236,7 @@ const Cookies = () => {
                     {editingCookie?.name === cookie.name ? (
                       <input
                         type="text"
-                        value={editingCookie.editableName} // Display editable name here
+                        value={editingCookie.editableName}
                         onChange={(e) => handleChange(e, 'editableName')}
                         className="w-full p-2 border rounded"
                       />
@@ -277,7 +266,7 @@ const Cookies = () => {
                     <p className="text-gray-600 mt-2">{cookie.description}</p>
                   )}
 
-                  {role === "cookie-manager" && showEditButtons && (
+                  {currentRole === "cookie-manager" && showEditButtons && (  
                     <>
                       <div className="absolute top-2 right-2">
                         <button

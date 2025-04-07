@@ -10,30 +10,34 @@ const Reservations = () => {
   const [filteredReservations, setFilteredReservations] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // Fetch reservations from Firestore
   useEffect(() => {
     const getReservations = async () => {
+      setLoading(true);
       try {
         const reservationList = await fetchReservations();
         setReservations(reservationList);
         setFilteredReservations(reservationList);
       } catch (error) {
         console.error("Error fetching reservations:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     getReservations();
   }, []);
 
-  // Automatically filter orders when date range changes
+  // Automatically filter reservations when date range changes
   useEffect(() => {
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
       end.setHours(23, 59, 59, 999);
-      
-      const filtered = reservations.filter(reservation => {
+
+      const filtered = reservations.filter((reservation) => {
         if (reservation.timestamp) {
           const reservationDate = new Date(reservation.timestamp.toDate());
           return reservationDate >= start && reservationDate <= end;
@@ -51,7 +55,7 @@ const Reservations = () => {
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar />
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Rservations"}/>
+        <Header page={"Reservations"} />
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
           <div className="bg-white p-6 rounded-md shadow-md">
             <h1 className="text-3xl font-bold mb-6 text-center">Reservations</h1>
@@ -70,10 +74,12 @@ const Reservations = () => {
               />
             </div>
 
-            {filteredReservations.length === 0 ? (
+            {loading ? (
+              <p className="text-center text-gray-500">Loading reservations...</p>
+            ) : filteredReservations.length === 0 ? (
               <p className="text-center">No reservations found in the selected range.</p>
             ) : (
-              <ReservationTable reservations={filteredReservations}/>
+              <ReservationTable reservations={filteredReservations} />
             )}
           </div>
         </main>
