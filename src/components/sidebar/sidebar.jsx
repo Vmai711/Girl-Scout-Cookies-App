@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useUserRole } from "../../firebase/roleUtils"; // Assuming this is where useUserRole is
+import { useUserRole } from "../../firebase/roleUtils"; 
 import { Sidebar } from "flowbite-react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../../firebase/firebase";
@@ -18,10 +18,10 @@ import { Cart } from "flowbite-react-icons/outline";
 import { UsersGroup } from "flowbite-react-icons/outline";
 
 const SideBar = () => {
-  const { currentRole } = useUserRole(); 
+  const { currentRole, loading } = useUserRole();
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [user, setUser] = useState(null);
-
+  
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -153,8 +153,7 @@ const SideBar = () => {
               </div>
             </Link>
 
-            {/* Ensure Troops link renders only after the role is loaded */}
-            {currentRole && (currentRole === "cookie-manager" || currentRole === "admin") && (
+            {!loading && (currentRole === "cookie-manager" || currentRole === "admin") && (
               <Link
                 to="/troops"
                 className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
@@ -165,7 +164,7 @@ const SideBar = () => {
                 </div>
               </Link>
             )}
-
+            
             <Link
               to="/order_form"
               className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2"

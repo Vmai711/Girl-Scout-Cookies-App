@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [endDate, setEndDate] = useState("");
   const [activeMonth, setActiveMonth] = useState(null);
   const [cookieColors, setCookieColors] = useState({});
+  const [showDateMenu, setShowDateMenu] = useState(false); // Menu toggle state
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -81,6 +82,11 @@ const Dashboard = () => {
         salesByMonth[month] = (salesByMonth[month] || 0) + cookiesSold;
       }
     });
+
+    if (Object.keys(salesByMonth).length === 0) {
+      return [];  // Return an empty array if no data exists for the filtered orders
+    }
+
     return Object.keys(salesByMonth).map((month) => ({ name: month, sales: salesByMonth[month] }));
   };
 
@@ -122,6 +128,12 @@ const Dashboard = () => {
     return salesArray;
   };
 
+  const handleClearFilters = () => {
+    setStartDate("");
+    setEndDate("");
+    setFilteredOrders(orders);
+  };
+
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar />
@@ -129,53 +141,122 @@ const Dashboard = () => {
         <Header page={"Dashboard"}/>
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
           <div className="bg-white p-6 rounded-md shadow-md">
-            <h1 className="text-3xl font-bold mb-6 text-center">Dashboard</h1>
-            <div className="flex justify-center gap-4 mb-4">
-              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="px-4 py-2 border rounded-md" />
-              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="px-4 py-2 border rounded-md" />
+            {/* Header with date range and options */}
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h1 className="text-3xl font-bold">Cookies Sold</h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  {startDate || endDate
+                    ? `From ${startDate || "beginning"} to ${endDate || "now"}`
+                    : "Showing all sales"}
+                </p>
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowDateMenu(!showDateMenu)}
+                  className="text-gray-600 hover:text-gray-900 text-2xl"
+                >
+                  &#8942;
+                </button>
+                {showDateMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg p-4 z-10">
+                    <label className="block text-sm text-gray-700 mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full mb-3 px-3 py-2 border rounded"
+                    />
+                    <label className="block text-sm text-gray-700 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <button
+                      onClick={handleClearFilters}
+                      className="w-full mt-3 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
+                    >
+                      Clear Filters
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Reset Pie Chart Button */}
-            <div className="flex justify-center mb-4">
-              <button
-                onClick={() => setActiveMonth(null)}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
-              >
-                Reset Pie Chart
-              </button>
+            {/* Display message if no data */}
+            {filteredOrders.length === 0 && (
+              <div className="text-center text-xl text-gray-600 mt-8">
+                <p>No orders in this date range</p>
+              </div>
+            )}
+
+            {/* Render charts if there is data */}
+            {filteredOrders.length > 0 && (
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-4">Cookie Sales by Type</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart
+                      data={processSalesData()}
+                      onClick={(e) => {
+                        if (e && e.activePayload && e.activePayload.length > 0) {
+                          setActiveMonth(e.activePayload[0].payload.name);
+                        } else {
+                          setActiveMonth(null);
+                        }
+                      }}
+                    >
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="sales" stroke="#8884d8" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie data={processCookieSales(activeMonth)} dataKey="value" nameKey="name" outerRadius={100}>
+                        {processCookieSales(activeMonth).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={cookieColors[entry.name] || colorPool[index % colorPool.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* Gray Background Divider between boxes */}
+          <div className="bg-gray-200 my-8 h-px"></div>
+
+          {/* Boxes for Last Orders and Top Girl Scouts (Side by Side) */}
+          <div className="flex space-x-6">
+            {/* Last Orders Box */}
+            <div className="bg-white p-6 rounded-md shadow-md flex-1">
+              <h3 className="text-xl font-semibold mb-4">Last Orders</h3>
+              <div className="space-y-4">
+                {Array.from({ length: 7 }).map((_, idx) => (
+                  <div key={idx} className="border-b pb-2">
+                    <p className="text-sm text-gray-600">Order {idx + 1} - John Doe</p>
+                    <p className="text-sm text-gray-500">Details...</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-6">
-              <h2 className="text-xl font-semibold mb-4">Cookie Sales by Type</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart
-                    data={processSalesData()}
-                    onClick={(e) => {
-                      if (e && e.activePayload && e.activePayload.length > 0) {
-                        setActiveMonth(e.activePayload[0].payload.name);
-                      } else {
-                        setActiveMonth(null);
-                      }
-                    }}
-                  >
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="sales" stroke="#8884d8" />
-                  </LineChart>
-                </ResponsiveContainer>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie data={processCookieSales(activeMonth)} dataKey="value" nameKey="name" outerRadius={100}>
-                      {processCookieSales(activeMonth).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={cookieColors[entry.name] || colorPool[index % colorPool.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+            {/* Top Girl Scouts Box */}
+            <div className="bg-white p-6 rounded-md shadow-md flex-1">
+              <h3 className="text-xl font-semibold mb-4">Top Girl Scouts</h3>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">John Doe</p>
+                <p className="text-sm text-gray-600">John Doe</p>
+                <p className="text-sm text-gray-600">John Doe</p>
+                <p className="text-sm text-gray-600">John Doe</p>
               </div>
             </div>
           </div>

@@ -67,15 +67,18 @@ const RoleChange = () => {
 
   const handleSetcurrentRole = async (role) => {
     if (!currentUser) return;
-
+  
     const userRef = doc(db, "users", currentUser.uid);
     await updateDoc(userRef, {
       currentRole: role,
     });
-
+  
     setcurrentRole(role);
     setMessage(`Set main role to: ${role}`);
+  
+    window.location.reload();
   };
+  
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
