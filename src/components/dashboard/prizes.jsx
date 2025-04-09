@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase/firebase";
-import { collection, getDocs, addDoc, updateDoc, doc, getDoc, setDoc } from "firebase/firestore";
+import {doc, getDoc, setDoc } from "firebase/firestore";
 
 
 import Header from "../header";
@@ -12,12 +12,13 @@ const Prizes = () => {
   const {currentUser} = useAuth();
   const [userPoints, setUserPoints] = useState(0);
 
-  const [error, setError] = useState("");
 
   useEffect(() => {
-
+    
     const FetchRewardPoints = async() => {
       
+      const [error, setError] = useState("");
+
       try{
         const rewardRef = doc(db, "rewardPoints", currentUser.uid);
         const rewardSnap = await getDoc(rewardRef);
@@ -32,7 +33,7 @@ const Prizes = () => {
       catch (err){
         setUserPoints(-1);
         setError("Error fetching reward points.");
-        console.error(err);
+        console.error(error);
       }
     };
     FetchRewardPoints();
