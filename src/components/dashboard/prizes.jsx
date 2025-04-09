@@ -1,10 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { db } from "../../firebase/firebase";
+import { collection, getDocs, addDoc, updateDoc, doc, getDoc, setDoc } from "firebase/firestore";
+
 
 import Header from "../header";
 import SideBar from "../sidebar/sidebar";
 import {Dropdown} from "flowbite-react";
+import { useAuth } from "../../contexts/authContext";
 
 const Prizes = () => {
+  const {currentUser} = useAuth();
+  const [userPoints, setUserPoints] = useState(0);
+
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+
+    const FetchRewardPoints = async() => {
+      
+      try{
+        const rewardRef = doc(db, "rewardPoints", currentUser.uid);
+        const rewardSnap = await getDoc(rewardRef);
+        if(rewardSnap.exists()){
+          const userData = rewardSnap.data();
+          setUserPoints(userData['points']);
+        } else{
+          await setDoc(rewardRef, {userId: currentUser.uid, points: parseInt(0) })
+          setUserPoints(rewardSnap.data()['points']);
+        }
+      }
+      catch (err){
+        setUserPoints(-1);
+        setError("Error fetching reward points.");
+        console.error(err);
+      }
+    };
+    FetchRewardPoints();
+  }, [currentUser]);
+
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar/>
@@ -15,6 +48,8 @@ const Prizes = () => {
         <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
           <h1 className="text-2xl font-bold mb-4">Rewards Page</h1>
           <p>Manage your reward points.</p>
+          <p>{userPoints}</p>
+          <p>{currentUser.uid}</p>
         </div>
         <div style = {{display: "grid", gridTemplateColumns: "30% 30% 30%", columnGap: "5%", rowGap: "10%", paddingLeft: "5%", paddingRight: "5%", paddingTop: "1%"}}>
           <div style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative"}}>
