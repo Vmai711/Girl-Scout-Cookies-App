@@ -1,204 +1,223 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { db } from "../../firebase/firebase";
 import { useAuth } from "../../contexts/authContext";
-import { collection, getDocs, addDoc, updateDoc, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, deleteDoc, addDoc } from "firebase/firestore";
 
 import Header from "../header";
 import SideBar from "../sidebar/sidebar";
+import { HiOutlinePencil, HiOutlineTrash, HiPlus } from "react-icons/hi";
+import { Table } from "flowbite-react";
 
 const Inventory = () => {
-    const { currentUser } = useAuth();
-    const [inventory, setInventory] = useState([]);
-    const [cookieTypes, setCookieTypes] = useState([]);
-    const [error, setError] = useState("");
-    const [editingId, setEditingId] = useState(null);
-    const [newQuantity, setNewQuantity] = useState("");
-    const [newItemName, setNewItemName] = useState("");
-    const [newItemQuantity, setNewItemQuantity] = useState("");  // Set this to an empty string initially
-    const [showAddItemForm, setShowAddItemForm] = useState(false);
+  const { currentUser } = useAuth();
+  const [inventory, setInventory] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [newQuantity, setNewQuantity] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [newCookieName, setNewCookieName] = useState("");
+  const [newCookieQuantity, setNewCookieQuantity] = useState(0);
 
-    useEffect(() => {
-        if (!currentUser) return;
+  const fetchInventory = useCallback(async () => {
+    if (!currentUser) return;
 
-        // Fetch the user's inventory
-        const fetchInventory = async () => {
-            try {
-                const userInventoryRef = collection(db, "users", currentUser.uid, "inventory");
-                const querySnapshot = await getDocs(userInventoryRef);
-                setInventory(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-            } catch (err) {
-                setError("Error fetching inventory.");
-                console.error(err);
-            }
-        };
+    const userRef = doc(db, "users", currentUser.uid);
+    const inventoryRef = collection(userRef, "inventory");
+    const querySnapshot = await getDocs(inventoryRef);
+    const items = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setInventory(items);
+  }, [currentUser]);
 
-        // Fetch available cookie types (field names)
-        const fetchCookieTypes = async () => {
-            try {
-                const docRef = doc(db, "cookieTypes", "Cookie Types Config");
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    // Extract field names (cookie names) directly
-                    setCookieTypes(Object.keys(docSnap.data()));
-                } else {
-                    console.error("No cookie types found.");
-                }
-            } catch (err) {
-                console.error("Error fetching cookie types:", err);
-            }
-        };
+  useEffect(() => {
+    fetchInventory();
+  }, [currentUser, fetchInventory]);
 
-        fetchInventory();
-        fetchCookieTypes();
-    }, [currentUser]);
+  const handleSaveEdit = async (id) => {
+    const itemRef = doc(db, "users", currentUser.uid, "inventory", id);
+    await updateDoc(itemRef, { quantity: Number(newQuantity) });
+    setEditingId(null);
+    fetchInventory();
+  };
 
-    // Update inventory quantity
-    const handleUpdate = async (id, change) => {
-        if (!currentUser) return;
-        const item = inventory.find(item => item.id === id);
-        if (!item || item.quantity + change < 0) return setError("Quantity cannot be negative.");
+  const handleDelete = async (id) => {
+    const itemRef = doc(db, "users", currentUser.uid, "inventory", id);
+    await deleteDoc(itemRef);
+    fetchInventory();
+    setIsModalOpen(false);
+  };
 
-        try {
-            const itemRef = doc(db, "users", currentUser.uid, "inventory", id);
-            await updateDoc(itemRef, { quantity: item.quantity + change });
-            setInventory(prev => prev.map(item => item.id === id ? { ...item, quantity: item.quantity + change } : item));
-        } catch (err) {
-            setError("Error updating inventory.");
-            console.error(err);
-        }
-    };
+  const handleCancelDelete = () => {
+    setIsModalOpen(false);
+  };
 
-    // Save the edited inventory quantity
-    const handleSaveEdit = async (id) => {
-        if (!currentUser || newQuantity === "" || isNaN(newQuantity) || newQuantity < 0) 
-            return setError("Please enter a valid quantity.");
+  const handleAddCookie = async () => {
+    if (!newCookieName || newCookieQuantity <= 0) {
+      alert("Please provide a valid name and quantity for the new cookie.");
+      return;
+    }
 
-        try {
-            const itemRef = doc(db, "users", currentUser.uid, "inventory", id);
-            await updateDoc(itemRef, { quantity: parseInt(newQuantity) });
-            setInventory(prev => prev.map(item => item.id === id ? { ...item, quantity: parseInt(newQuantity) } : item));
-            setNewQuantity("");
-            setEditingId(null);
-        } catch (err) {
-            setError("Error saving edited quantity.");
-            console.error(err);
-        }
-    };
+    const quantity = Number(newCookieQuantity);
 
-    // Handle adding a new item to inventory
-    const handleAddItem = async (e) => {
-        e.preventDefault();
-        if (!currentUser || !newItemName.trim() || newItemQuantity === "" || isNaN(newItemQuantity) || newItemQuantity <= 0) 
-            return setError("Please select a valid cookie and quantity.");
+    const userRef = doc(db, "users", currentUser.uid);
+    const inventoryRef = collection(userRef, "inventory");
+    await addDoc(inventoryRef, {
+      name: newCookieName,
+      quantity: quantity,
+    });
 
-        try {
-            const userInventoryRef = collection(db, "users", currentUser.uid, "inventory");
-            await addDoc(userInventoryRef, { name: newItemName, quantity: parseInt(newItemQuantity) });
+    setNewCookieName("");
+    setNewCookieQuantity(0);
+    setIsAddFormOpen(false);
+    fetchInventory();
+  };
 
-            const querySnapshot = await getDocs(userInventoryRef);
-            setInventory(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-
-            setNewItemName("");
-            setNewItemQuantity(""); 
-            setShowAddItemForm(false);
-            setError("");
-        } catch (err) {
-            setError("Error adding item to inventory.");
-            console.error(err);
-        }
-    };
-
-    return (
-        <div className="bg-custom-light-gray flex min-h-screen">
-            <SideBar />
-            <div className="w-full h-fit sm:ml-64">
-                <Header page={"Inventory Management"} />
-                <main className="mt-[3.5rem] p-8">
-                    <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
-                        <h1 className="text-2xl font-bold mb-4">Inventory Management</h1>
-                        {error && <p className="text-red-500 mb-4">{error}</p>}
-
-                        {/* Add Item Button / Form Toggle */}
-                        {!showAddItemForm ? (
-                            <button
-                                onClick={() => setShowAddItemForm(true)}
-                                className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
-                            >
-                                Add Item
-                            </button>
-                        ) : (
-                            <form onSubmit={handleAddItem} className="mb-6">
-                                <h2 className="text-xl mb-4">Add New Item</h2>
-                                <div className="mb-4">
-                                    <label className="block">Select Cookie Type</label>
-                                    <select
-                                        value={newItemName}
-                                        onChange={(e) => setNewItemName(e.target.value)}
-                                        className="w-full p-2 border rounded"
-                                        required
-                                    >
-                                        <option value="">Select a Cookie</option>
-                                        {cookieTypes.map((cookie, index) => (
-                                            <option key={index} value={cookie}>{cookie}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block">Initial Quantity</label>
-                                    <input
-                                        type="number"
-                                        value={newItemQuantity}
-                                        onChange={(e) => setNewItemQuantity(e.target.value.replace(/^0+/, ""))}  
-                                        className="w-full p-2 border rounded"
-                                        required
-                                        min="1"
-                                        placeholder="Enter quantity"
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-700"
-                                >
-                                    Add Item
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowAddItemForm(false)}
-                                    className="mt-2 w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-700"
-                                >
-                                    Cancel
-                                </button>
-                            </form>
-                        )}
-
-                        {/* Inventory List */}
-                        <ul className="space-y-4">
-                            {inventory.map((item) => (
-                                <li key={item.id} className="flex justify-between items-center border-b pb-2">
-                                    <span>{item.name}</span>
-                                    <div className="flex items-center space-x-2">
-                                        <button className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600" onClick={() => handleUpdate(item.id, -1)}> - </button>
-                                        {editingId === item.id ? (
-                                            <input type="number" value={newQuantity} onChange={(e) => setNewQuantity(e.target.value)} className="w-16 p-2 border rounded text-center" onBlur={() => handleSaveEdit(item.id)} autoFocus />
-                                        ) : (
-                                            <span
-                                                onClick={() => { setEditingId(item.id); setNewQuantity(item.quantity); }}
-                                                className="cursor-pointer px-2 py-1 border rounded hover:bg-gray-100"
-                                                style={{ minWidth: "60px", textAlign: "center" }}
-                                            >
-                                                {item.quantity} boxes
-                                            </span>
-                                        )}
-                                        <button className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" onClick={() => handleUpdate(item.id, 1)}> + </button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </main>
+  return (
+    <div className="bg-custom-light-gray flex min-h-screen">
+      <SideBar />
+      <div className="w-full sm:ml-64 h-fit">
+        <Header page={"Inventory Management"} />
+        <main className="mt-[3.5rem] p-8">
+          <div className="bg-white max-w-4xl mx-auto p-6 rounded-md shadow-md">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold">Inventory</h1>
+              <button
+                onClick={() => setIsAddFormOpen(true)}
+                className="flex items-center text-white bg-blue-600 hover:bg-blue-700 py-2 px-2 rounded-full"
+              >
+                <HiPlus className="text-white text-2xl" />
+              </button>
             </div>
+
+            {isAddFormOpen && (
+              <div className="bg-gray-100 p-6 rounded-md shadow-md mb-6">
+                <h2 className="text-xl font-bold mb-4">Add New Cookie</h2>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Cookie Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newCookieName}
+                    onChange={(e) => setNewCookieName(e.target.value)}
+                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+                    placeholder="Enter cookie name"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    value={newCookieQuantity}
+                    onChange={(e) => setNewCookieQuantity(e.target.value.replace(/^0+/, ""))}
+                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+                    placeholder="Enter quantity"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAddCookie}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-md mr-4"
+                  >
+                    Add Cookie
+                  </button>
+                  <button
+                    onClick={() => setIsAddFormOpen(false)}
+                    className="bg-gray-300 text-gray-800 px-6 py-2 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="overflow-x-auto">
+              <Table>
+                <Table.Head>
+                  <Table.HeadCell>Cookie Name</Table.HeadCell>
+                  <Table.HeadCell>Quantity</Table.HeadCell>
+                  <Table.HeadCell>Actions</Table.HeadCell>
+                </Table.Head>
+                <Table.Body>
+                  {inventory.map((item) => (
+                    <React.Fragment key={item.id}>
+                      <Table.Row>
+                        <Table.Cell>{item.name}</Table.Cell>
+                        <Table.Cell>
+                          {editingId === item.id ? (
+                            <input
+                              type="number"
+                              value={newQuantity}
+                              onChange={(e) => setNewQuantity(e.target.value.replace(/^0+/, ""))}
+                              onBlur={() => handleSaveEdit(item.id)}
+                              autoFocus
+                              className="w-20 px-2 py-1 border rounded text-center"
+                            />
+                          ) : (
+                            item.quantity
+                          )}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <button
+                            onClick={() => {
+                              setEditingId(item.id);
+                              setNewQuantity(item.quantity);
+                            }}
+                            className="text-blue-600 hover:text-blue-900 mr-4"
+                            title="Edit"
+                          >
+                            <HiOutlinePencil />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setItemToDelete(item.id);
+                              setIsModalOpen(true);
+                            }}
+                            className="text-red-600 hover:text-red-900"
+                            title="Delete"
+                          >
+                            <HiOutlineTrash />
+                          </button>
+                        </Table.Cell>
+                      </Table.Row>
+                    </React.Fragment>
+                  ))}
+                </Table.Body>
+              </Table>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-md shadow-md max-w-xs">
+            <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+            <p className="text-sm mb-4">Are you sure you want to delete this cookie?</p>
+            <div className="flex justify-between">
+              <button
+                onClick={() => handleDelete(itemToDelete)}
+                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={handleCancelDelete}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default Inventory;

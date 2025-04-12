@@ -31,22 +31,22 @@ export const fetchUserRole = async (uid) => {
 export const useUserRole = () => {
   const { currentUser } = useAuth(); 
   const [userRole, setUserRole] = useState({ roles: [], currentRole: null }); 
-  const [loading, setLoading] = useState(true); // 👈 Add loading state
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     if (currentUser) {
       const fetchRole = async () => {
         const roleData = await fetchUserRole(currentUser.uid);
         setUserRole(roleData);
-        setLoading(false); // ✅ Done loading
+        setLoading(false); 
       };
 
       fetchRole();
     } else {
-      setLoading(false); // ✅ Done even if no user
+      setLoading(false); 
     }
   }, [currentUser]);
 
-  return { ...userRole, loading }; // 👈 Return loading
+  return { ...userRole, loading }; 
 };
 
