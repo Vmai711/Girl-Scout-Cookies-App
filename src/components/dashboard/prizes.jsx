@@ -35,7 +35,7 @@ const Prizes = () => {
       }
     };
     FetchRewardPoints();
-  }, [currentUser]);
+  }, [currentUser, error]);
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
