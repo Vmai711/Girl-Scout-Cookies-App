@@ -12,12 +12,10 @@ const Prizes = () => {
   const {currentUser} = useAuth();
   const [userPoints, setUserPoints] = useState(0);
 
-
+  const [error, setError] = useState("");
   useEffect(() => {
     
     const FetchRewardPoints = async() => {
-      
-      const [error, setError] = useState("");
 
       try{
         const rewardRef = doc(db, "rewardPoints", currentUser.uid);
