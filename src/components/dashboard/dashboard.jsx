@@ -136,7 +136,7 @@ const Dashboard = () => {
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
-      <SideBar />
+      <SideBar page={"dashboard"}/>
       <div className="w-full h-fit sm:ml-64">
         <Header page={"Dashboard"}/>
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">

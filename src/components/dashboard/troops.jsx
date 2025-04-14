@@ -7,7 +7,7 @@ import TroopsTable from "../tables/troopsTable";
 const Troops = () => {
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
-      <SideBar/>
+      <SideBar page={"troops"}/>
 
       <div className="w-full h-fit sm:ml-64">
         <Header page={"Troops"}/>

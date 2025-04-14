@@ -165,7 +165,7 @@ const Cookies = () => {
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
-      <SideBar />
+      <SideBar page={"cookies"}/>
       <div className="w-full h-fit sm:ml-64">
         <Header page={"Cookies"} />
         <main className="mt-[3.5rem] p-8">

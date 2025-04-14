@@ -128,7 +128,7 @@ const Messages = () => {
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
-      <SideBar />
+      <SideBar page={"messages"}/>
       <div className="flex w-full h-fit sm:ml-64">
         {/*thread list and search */}
         <div className="w-80 bg-gray-100 p-4 border-r h-screen overflow-y-auto">

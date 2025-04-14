@@ -39,7 +39,7 @@ const Prizes = () => {
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
-      <SideBar/>
+      <SideBar page={"prizes"}/>
 
       <div className="w-full h-fit sm:ml-64">
         <Header page={"Awards"}/>

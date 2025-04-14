@@ -129,7 +129,7 @@ const Booth = () => {
 
     return (
         <div className="bg-custom-light-gray flex min-h-screen">
-        <SideBar/>
+        <SideBar page={"booth"}/>
   
         <div className="w-full h-fit sm:ml-64">
           <Header page={"Booth"}/>
