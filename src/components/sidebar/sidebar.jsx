@@ -17,7 +17,7 @@ import { Store } from "flowbite-react-icons/outline";
 import { Cart } from "flowbite-react-icons/outline";
 import { UsersGroup } from "flowbite-react-icons/outline";
 
-const SideBar = () => {
+const SideBar = ({ page }) => {
   const { currentRole, loading } = useUserRole();
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [user, setUser] = useState(null);
@@ -50,7 +50,7 @@ const SideBar = () => {
           <Sidebar.ItemGroup>
             <Link
               to="/dashboard"
-              className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              className={page === "dashboard" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Grid />
@@ -60,7 +60,7 @@ const SideBar = () => {
 
             <Link
               to="/order-management"
-              className="block text-center hover:text-black py-3 mb-2 rounded-md hover:bg-custom-dark-green p-2 text-gray-600"
+              className={page === "order-management" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Inbox />
@@ -70,7 +70,7 @@ const SideBar = () => {
 
             <Link
               to="/reservations"
-              className="block text-center hover:text-black py-3 mb-2 rounded-md hover:bg-custom-dark-green p-2 text-gray-600"
+              className={page === "reservations" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Store />
@@ -80,7 +80,7 @@ const SideBar = () => {
 
             <Link
               to="/inventory"
-              className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              className={page === "inventory" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Inbox />
@@ -90,7 +90,7 @@ const SideBar = () => {
 
             <Link
               to="/transactions"
-              className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              className={page === "transactions" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Receipt />
@@ -100,7 +100,7 @@ const SideBar = () => {
 
             <Link
               to="/cookies"
-              className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              className={page === "cookies" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Palette />
@@ -110,7 +110,7 @@ const SideBar = () => {
 
             <Link
               to="/messages"
-              className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              className={page === "messages" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3 items-center relative">
                 <Messages />
@@ -125,7 +125,7 @@ const SideBar = () => {
 
             <Link
               to="/prizes"
-              className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              className={page === "prizes" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Award />
@@ -135,7 +135,7 @@ const SideBar = () => {
 
             <Link
               to="/booth"
-              className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              className={page === "booth" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Store />
@@ -145,7 +145,7 @@ const SideBar = () => {
 
             <Link
               to="/RoleChange"
-              className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+              className={page === "rolechange" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Store />
@@ -156,7 +156,7 @@ const SideBar = () => {
             {!loading && (currentRole === "cookie-manager" || currentRole === "admin") && (
               <Link
                 to="/troops"
-                className="block text-center py-3 mb-2 rounded-md hover:bg-custom-dark-green hover:text-black p-2 text-gray-600"
+                className={page === "troops" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
               >
                 <div className="flex gap-3">
                   <UsersGroup />
