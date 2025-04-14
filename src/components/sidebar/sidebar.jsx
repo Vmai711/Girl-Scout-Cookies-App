@@ -16,6 +16,8 @@ import { Award } from "flowbite-react-icons/outline";
 import { Store } from "flowbite-react-icons/outline";
 import { Cart } from "flowbite-react-icons/outline";
 import { UsersGroup } from "flowbite-react-icons/outline";
+import { AddressBook } from "flowbite-react-icons/outline";
+import { Cog } from "flowbite-react-icons/outline";
 
 const SideBar = ({ page }) => {
   const { currentRole, loading } = useUserRole();
@@ -73,7 +75,7 @@ const SideBar = ({ page }) => {
               className={page === "reservations" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
-                <Store />
+                <AddressBook />
                 Reservations Page
               </div>
             </Link>
@@ -148,7 +150,7 @@ const SideBar = ({ page }) => {
               className={page === "rolechange" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
-                <Store />
+                <Cog />
                 Dev Role Change Page
               </div>
             </Link>
