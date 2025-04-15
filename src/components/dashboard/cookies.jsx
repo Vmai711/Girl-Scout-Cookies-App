@@ -4,7 +4,7 @@ import { getDoc, doc, updateDoc, deleteField } from "firebase/firestore";
 import { useUserRole } from "../../firebase/roleUtils";
 
 import { storage } from "../../firebase/storage";
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 import Header from "../header";
 import SideBar from "../sidebar/sidebar";
@@ -68,6 +68,20 @@ const Cookies = () => {
       return;
     }
 
+    const removeURL = editingCookie.imageUrl
+
+    // Uploads the new image to the db. If the img upload is a success it deletes the old img, else it just returns and nothing happens
+    if(imageUpload) {
+      const imgURL = await uploadImage();
+      if(!imgURL) {
+        alert("Image upload failed. Please try again!");
+        return;
+      } else {
+        editingCookie.imageUrl = imgURL
+      }
+      deleteImage(removeURL)
+    }
+
     try {
       const docRef = doc(db, "cookieTypes", "Cookie Types Config");
 
@@ -107,7 +121,7 @@ const Cookies = () => {
             : cookie
         ));
       }
-
+      setImageUpload(null);
       setEditingCookie(null);
     } catch (error) {
       console.error("Error saving edited cookie:", error);
@@ -162,6 +176,29 @@ const Cookies = () => {
       return null
     }
   };
+
+  const getPathFromUrl = (url) => {
+    const decodeURL = decodeURIComponent(url)
+    const matches = decodeURL.match(/\/o\/(.*?)\?alt=media/);
+    if (matches && matches[1]) {
+      return matches[1];
+    }
+    return null;
+  }
+
+  const deleteImage = async (imgURL) => {
+    const path = getPathFromUrl(imgURL);
+
+    if(!imgURL) return;
+
+    try {
+      const imageRef = ref(storage, path);
+      await deleteObject(imageRef)
+      console.log("Image deleted successfully")
+    } catch (error) {
+      console.error("Error deleting image:", error);
+    }
+  }
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
@@ -245,11 +282,11 @@ const Cookies = () => {
                     )}
                   </h2>
                   {editingCookie?.name === cookie.name ? (
-                    <input
-                      type="text"
-                      value={editingCookie.imageUrl}
-                      onChange={(e) => handleChange(e, 'imageUrl')}
-                      placeholder="Image URL"
+                    <input 
+                      type="file" 
+                      name="editImg" 
+                      id="editImg"
+                      onChange={(event) => {setImageUpload(event.target.files[0])}}
                       className="w-full p-2 border rounded mb-2"
                     />
                   ) : (
