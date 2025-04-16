@@ -10,9 +10,36 @@ import { useAuth } from "../../contexts/authContext";
 
 const Prizes = () => {
   const {currentUser} = useAuth();
+  const [rewards, setRewards] = useState([]);
   const [userPoints, setUserPoints] = useState(0);
 
   const [error, setError] = useState("");
+  
+  useEffect(() => {
+
+    const FetchRewards = async() => {
+      try{
+        const rewardsRef = doc(db, "rewards", "exampleRewards");
+        const rewardsSnap = await getDoc(rewardsRef);
+        if(rewardsSnap.exists()){
+          const rewardData = rewardsSnap.data();
+          const formattedRewards = Object.entries(rewardData).map(([rewardName, details]) => ({
+            name: rewardName,
+            imageURL: details[0],
+            pointCost: details[1],
+          }));
+          formattedRewards.sort((a, b) => a.pointCost - b.pointCost);
+          setRewards(formattedRewards);
+        }
+      } catch(error){
+        console.error("Error fetching Rewards", error);
+        
+      }
+    };
+
+    FetchRewards();
+  }, [rewards]);
+
   useEffect(() => {
     
     const FetchRewardPoints = async() => {
@@ -36,6 +63,7 @@ const Prizes = () => {
     };
     FetchRewardPoints();
   }, [currentUser, error]);
+ 
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
@@ -50,58 +78,37 @@ const Prizes = () => {
           <p>{userPoints}</p>
           <p>{currentUser.uid}</p>
         </div>
-        <div style = {{display: "grid", gridTemplateColumns: "30% 30% 30%", columnGap: "5%", rowGap: "10%", paddingLeft: "5%", paddingRight: "5%", paddingTop: "1%"}}>
-          <div style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative"}}>
+        <div style = {{display: "grid", gridTemplateColumns: "30% 30% 30%", columnGap: "5%", rowGap: "0%", paddingLeft: "5%", paddingRight: "5%", paddingTop: "5%"}}>
+          {rewards.length > 0 ? rewards.map((reward, index) => (
+            <div key = {index} style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative", marginBottom: "15%"}}>
+              <Dropdown
+              arrowIcon = {false}
+              style = {{width: "1.5vw", height: "1.5vw", position: "absolute", right: "5%", top: "5%"}}>
+                <Dropdown.Item>Test</Dropdown.Item>
+            </Dropdown>
+            <img src = {reward.imageURL} alt = {reward.name} style = {{borderRadius: "50%"}}></img>
+            <p style = {{textAlign: "center"}}>{reward.name}</p>
+            <button type = "button" className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2" style = {{position: 'relative', left: '50%', transform: 'translateX(-50%)', marginTop: "10px", width: "100%"}}>
+              <p>{reward.pointCost} Orders</p>
+            </button>
+            </div>
+          )) : (
+            <p className="text-center col-span-full">No rewards available.</p>
+          )}
+          {/* <div style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative"}}>
             <Dropdown
             arrowIcon = {false}
             style = {{width: "1.5vw", height: "1.5vw", position: "absolute", right: "5%", top: "5%"}}>
               <Dropdown.Item>Test</Dropdown.Item>
             </Dropdown>
-            {/*<img alt = "No Image Available"></img>*/}
+            {/*<img alt = "No Image Available"></img>* uncomment /}
             <p style = {{textAlign: "center"}}>Test Reward Name</p>
             <button type = "button" className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2" style = {{position: 'relative', left: '50%', transform: 'translateX(-50%)', marginTop: "10px", width: "100%"}}>
               <p>1200+ Orders</p>
             </button>
-          </div>
+          </div> */}
 
-          <div style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative"}}>
-            <Dropdown
-            arrowIcon = {false}
-            style = {{width: "1.5vw", height: "1.5vw", position: "absolute", right: "5%", top: "5%"}}>
-              <Dropdown.Item>Test</Dropdown.Item>
-            </Dropdown>
-            {/*<img alt = "No Image Available"></img>*/}
-            <p style = {{textAlign: "center"}}>Test Reward Name</p>
-            <button type = "button" className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2" style = {{position: 'relative', left: '50%', transform: 'translateX(-50%)', marginTop: "10px", width: "100%"}}>
-              <p>1200+ Orders</p>
-            </button>
-          </div>
           
-          <div style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative"}}>
-            <Dropdown
-            arrowIcon = {false}
-            style = {{width: "1.5vw", height: "1.5vw", position: "absolute", right: "5%", top: "5%"}}>
-              <Dropdown.Item>Test</Dropdown.Item>
-            </Dropdown>
-            {/*<img alt = "No Image Available"></img>*/}
-            <p style = {{textAlign: "center"}}>Test Reward Name</p>
-            <button type = "button" className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2" style = {{position: 'relative', left: '50%', transform: 'translateX(-50%)', marginTop: "10px", width: "100%"}}>
-              <p>1200+ Orders</p>
-            </button>
-          </div>
-
-          <div style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative"}}>
-            <Dropdown
-            arrowIcon = {false}
-            style = {{width: "1.5vw", height: "1.5vw", position: "absolute", right: "5%", top: "5%"}}>
-              <Dropdown.Item>Test</Dropdown.Item>
-            </Dropdown>
-            {/*<img alt = "No Image Available"></img>*/}
-            <p style = {{textAlign: "center"}}>Test Reward Name</p>
-            <button type = "button" className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2" style = {{position: 'relative', left: '50%', transform: 'translateX(-50%)', marginTop: "10px", width: "100%"}}>
-              <p>1200+ Orders</p>
-            </button>
-          </div>
         </div>
         </main>
       </div>
