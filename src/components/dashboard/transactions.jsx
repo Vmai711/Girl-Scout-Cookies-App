@@ -1,24 +1,235 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/authContext';
+import { useNavigate } from 'react-router-dom';
+import { fetchCookieTypes} from '../../firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
-import Header from "../header";
-import SideBar from "../sidebar/sidebar";
+import Header from '../header';
+import SideBar from '../sidebar/sidebar';
 
 const Transactions = () => {
-  return (
-    <div className="bg-custom-light-gray flex min-h-screen">
-      <SideBar page={"transactions"}/>
+    const navigate = useNavigate();
+    const { currentUser } = useAuth();
 
-      <div className="w-full h-fit sm:ml-64">
-        <Header page={"Transactions"}/>
-        <main className="mt-[3.5rem] p-8">
-        <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
-          <h1 className="text-2xl font-bold mb-4">Transaction Management</h1>
-          <p>Manage your transactions here.</p>
+    const [girlName, setGirlName] = useState('');
+    const [parentName, setParentName] = useState('');
+    const [cookieSelections, setCookieSelections] = useState([{ cookie: '', numCookies: '' }]);
+    const [date, setDate] = useState("");
+    const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
+    const [cookieTypes, setCookieTypes] = useState([]);
+    
+
+    // Fetch the cookie types from Firestore when the component mounts
+    useEffect(() => {
+        const getCookieTypes = async () => {
+            try {
+                const types = await fetchCookieTypes(); // Fetch only cookie names
+                setCookieTypes(types);
+            } catch (error) {
+                console.error("Error fetching cookie types:", error);
+            }
+        };
+  
+        getCookieTypes();
+    }, []);    
+
+    const handleCookieChange = (index, field, value) => {
+        const newCookieSelections = [...cookieSelections];
+        newCookieSelections[index][field] = value;
+        setCookieSelections(newCookieSelections);
+    };
+
+    const addCookieSelection = () => {
+        setCookieSelections([...cookieSelections, { cookie: '', numCookies: '' }]);
+    };
+
+    const removeCookieSelection = (index) => {
+        const newCookieSelections = cookieSelections.filter((_, i) => i !== index);
+        setCookieSelections(newCookieSelections);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    
+        if (!acceptedResponsibility) {
+            alert("You must accept financial responsibility before submitting.");
+            return;
+        }
+
+        const numberOfBoxesSold = cookieSelections.reduce((total, selection) => {
+            return total + parseInt(selection.numCookies || 0, 10);
+        }, 0);
+    
+        const transactionData = {
+            email: currentUser?.email || '',
+            girlName,
+            parentName,
+            cookieSelections,
+            numberOfBoxesSold,
+            acceptedResponsibility,
+        };
+
+        
+        try {
+            const transactionId = await addRewardPoints(currentUser.uid, numberOfBoxesSold); // Pass user ID
+            alert(`Receipt submitted successfully! You have earned ${numberOfBoxesSold} points (ID: ${transactionId})`);
+            localStorage.setItem("transactionData", JSON.stringify(transactionData));
+            navigate("/transactionsummary", { state: transactionData });
+        } catch (error) {
+            console.error("Error submitting order:", error);
+            alert("There was an error submitting your order. Please try again.");
+        }
+    };
+
+    const addRewardPoints = async (userId, boxesSold) => {
+        const rewardRef = doc(db, "rewardPoints", userId);
+        const rewardSnap = await getDoc(rewardRef);
+    
+          if (rewardSnap.exists()) {
+            const prevPoints = rewardSnap.data().points || 0;
+            await updateDoc(rewardRef, {
+              points: prevPoints + boxesSold
+            });
+          } 
+          else {
+            await setDoc(rewardRef, {
+              userId,
+              points: boxesSold
+            });
+          }
+          return rewardRef.id;
+        };
+    
+    return (
+        <div className="bg-custom-light-gray flex min-h-screen">
+            <SideBar />
+            <div className="w-full h-fit sm:ml-64">
+                <Header page={"Order Form"}/>
+                <main className="mt-[3.5rem] p-8">
+                    <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
+                        <h2 className="text-2xl font-bold mb-4">Girl Scout Cookie Order Form</h2>
+                        
+                        <form onSubmit={handleSubmit}>
+
+                            {/* Email (Autofilled) */}
+                            <div className="mb-4">
+                                <label className="block font-semibold">Email:</label>
+                                <input 
+                                    type="email"
+                                    value={currentUser?.email || ''}
+                                    readOnly
+                                    className="w-full p-2 border rounded bg-gray-100"
+                                />
+                            </div>
+
+                            {/* Girl's Name */}
+                            <div className="mb-4">
+                                <label className="block font-semibold">Girl's Name:</label>
+                                <input 
+                                    type="text"
+                                    value={girlName}
+                                    onChange={(e) => setGirlName(e.target.value)}
+                                    required
+                                    className="w-full p-2 border rounded"
+                                />
+                            </div>
+
+                            {/* Parent's Name */}
+                            <div className="mb-4">
+                                <label className="block font-semibold">Parent's Name:</label>
+                                <input 
+                                    type="text"
+                                    value={parentName}
+                                    onChange={(e) => setParentName(e.target.value)}
+                                    required
+                                    className="w-full p-2 border rounded"
+                                />
+                            </div>
+
+                            {/* Transaction Date */}
+                            <div className="mb-4">
+                                <label className="block font-semibold">Date:</label>
+                                <input
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                className="px-4 py-2 border rounded-md"
+                                />
+                            </div>
+
+                            {/* Cookie Selections */}
+                            <div className="mb-4">
+                                <label className="block font-semibold">Select Cookies Sold:</label>
+                                {cookieSelections.map((cookieSelection, index) => (
+                                    <div key={index} className="flex gap-4 mb-4 items-center">
+                                        <select
+                                            value={cookieSelection.cookie}
+                                            onChange={(e) => handleCookieChange(index, 'cookie', e.target.value)}
+                                            required
+                                            className="w-1/2 p-2 border rounded"
+                                        >
+                                            <option value="">Select Cookie</option>
+                                            {cookieTypes.map((cookie, i) => (
+                                                <option key={i} value={cookie}>{cookie}</option>
+                                            ))}
+                                        </select>
+                                        <input 
+                                            type="number"
+                                            value={cookieSelection.numCookies}
+                                            onChange={(e) => handleCookieChange(index, 'numCookies', e.target.value)}
+                                            required
+                                            className="w-1/2 p-2 border rounded"
+                                            placeholder="Number of Cookies"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeCookieSelection(index)}
+                                            className="text-red-500 ml-2"
+                                        >
+                                            X
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={addCookieSelection}
+                                    className="text-blue-500 mt-2"
+                                >
+                                    Add another cookie
+                                </button>
+                            </div>
+
+                            {/* Financial Responsibility Agreement */}
+                            <div className="mb-4">
+                                    <label className="block font-semibold">Make sure that everything is correct (boxes sold, date, and time)</label>
+                                    <div className="flex items-center">
+                                        <input 
+                                            type="checkbox"
+                                            name="responsibility"
+                                            checked={acceptedResponsibility}
+                                            onChange={() => setAcceptedResponsibility(true)}
+                                            required
+                                            className="mr-2"
+                                        />
+                                        <span>I have confirmed that the number of boxes sold is correct</span>
+                                    </div>
+                                </div>
+
+                            {/* Submit Button */}
+                            <button 
+                                type="submit" 
+                                className={`w-full text-white p-2 rounded transition ${acceptedResponsibility ? 'bg-green-500 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                                disabled={!acceptedResponsibility}
+                            >
+                                Submit Receipt
+                            </button>
+                        </form>
+                    </div>
+                </main>
+            </div>
         </div>
-        </main>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Transactions;

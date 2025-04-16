@@ -24,6 +24,7 @@ import RoleChange from "./components/dashboard/tempRoleChange";
 //Summary Components
 import BoothSummary from "./components/summary/boothsummary";
 import OrderSummary from "./components/summary/ordersummary";
+import TransactionSummary from "./components/summary/transactionsummary";
 
 import { AuthProvider } from "./contexts/authContext";
 import { useRoutes } from "react-router-dom";
@@ -49,6 +50,7 @@ function App() {
     { path: "/booth", element: <Booth /> },
     { path: "/boothsummary", element: <BoothSummary /> },
     { path: "/ordersummary", element: <OrderSummary /> },
+    { path: "/transactionsummary", element: <TransactionSummary /> },
     { path: "/reservations", element: <Reservations /> },
     { path: "/rolechange", element: <RoleChange /> },
   ];
