@@ -10,7 +10,7 @@ import SideBar from '../sidebar/sidebar';
 const Order = () => {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
-    const role = useUserRole();
+    const { currentRole } = useUserRole(); 
 
     const [girlName, setGirlName] = useState('');
     const [parentName, setParentName] = useState('');
@@ -153,7 +153,7 @@ const Order = () => {
                                 <>
                                     <p>Pre-Order Deadline: <strong>{deadlines.preorderDeadline}</strong></p>
                                     <p>Order Deadline: <strong>{deadlines.orderDeadline}</strong></p>
-                                    {(role === 'admin' || role === 'cookie-manager' || role === 'troop-leader') && (
+                                    {(currentRole === "admin" || currentRole === "cookie-manager" || currentRole === "troop-leader") && (
                                         <button
                                             onClick={() => setEditingDeadlines(true)}
                                             className="mt-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
@@ -161,6 +161,7 @@ const Order = () => {
                                             Edit Deadlines
                                         </button>
                                     )}
+
                                 </>
                             )}
                         </div>

@@ -1,5 +1,5 @@
 import { db } from './firebase'; // Ensure this correctly imports your Firebase setup
-import { collection, addDoc, serverTimestamp, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, Timestamp, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 
 /**
  * Save an order to both the global 'orders' collection and the user's specific order collection.
@@ -60,15 +60,22 @@ export const fetchUserOrders = async (userId) => {
  * Fetch deadlines
  */
 export const fetchDeadlines = async () => {
-    const deadlinecollection = collection(db, "deadlines", "deadlines");
-    const snapshot = await getDoc(deadlinecollection);
+    const deadlinedoc = doc(db, "deadlines", "deadlines");
+    const snapshot = await getDoc(deadlinedoc);
+
     if (snapshot.exists()) {
         const data = snapshot.data();
+
         return {
-            preorderDeadline: data.preorderDeadline?.toDate(), 
-            orderDeadline: data.orderDeadline?.toDate()
+            preorderDeadline: data.preorderDeadline instanceof Timestamp
+                ? data.preorderDeadline.toDate()
+                : new Date(data.preorderDeadline),
+            orderDeadline: data.orderDeadline instanceof Timestamp
+                ? data.orderDeadline.toDate()
+                : new Date(data.orderDeadline),
         };
     }
+
     return null;
 };
 
@@ -76,10 +83,17 @@ export const fetchDeadlines = async () => {
  * Update deadlines
  */
 export const updateDeadlines = async (newDeadlines) => {
-    const deadlinecollection = collection(db, "deadlines", "deadlines");
-    await updateDoc(deadlinecollection, {
-        preorderDeadline: new Date(new Date(newDeadlines.preorderDeadline).setDate(new Date(newDeadlines.preorderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" }),
-        orderDeadline: new Date(new Date(newDeadlines.orderDeadline).setDate(new Date(newDeadlines.orderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" })
+    const deadlinedoc = doc(db, "deadlines", "deadlines");
+
+    const preorder = new Date(newDeadlines.preorderDeadline);
+    preorder.setDate(preorder.getDate() + 1); // optional: remove if not needed
+
+    const order = new Date(newDeadlines.orderDeadline);
+    order.setDate(order.getDate() + 1); // optional: remove if not needed
+
+    await updateDoc(deadlinedoc, {
+        preorderDeadline: Timestamp.fromDate(preorder),
+        orderDeadline: Timestamp.fromDate(order),
     });
 };
 
