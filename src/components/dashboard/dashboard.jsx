@@ -5,6 +5,8 @@ import Header from "../header";
 import SideBar from "../sidebar/sidebar";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { PieChart, Pie, Legend } from "recharts";
+import { useMemo } from "react";
+
 
 const colorPool = [
   "#FFB6C1", "#FFD700", "#87CEEB", "#FF69B4",
@@ -21,6 +23,12 @@ const Dashboard = () => {
   const [cookieColors, setCookieColors] = useState({});
   const [showDateMenu, setShowDateMenu] = useState(false); // Menu toggle state
 
+  const latestOrders = useMemo(() => {
+  return [...filteredOrders]
+    .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
+    .slice(0, 5);
+  }, [filteredOrders]);  
+
   useEffect(() => {
     const fetchOrders = async () => {
       const ordersRef = collection(db, "orders");
@@ -29,7 +37,7 @@ const Dashboard = () => {
       const ordersData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setOrders(ordersData);
       setFilteredOrders(ordersData);
-    };
+    }; 
 
     const fetchCookieTypes = async () => {
       const cookieRef = collection(db, "cookieTypes");
@@ -239,14 +247,39 @@ const Dashboard = () => {
             {/* Last Orders Box */}
             <div className="bg-white p-6 rounded-md shadow-md flex-1">
               <h3 className="text-xl font-semibold mb-4">Last Orders</h3>
-              <div className="space-y-4">
-                {Array.from({ length: 7 }).map((_, idx) => (
-                  <div key={idx} className="border-b pb-2">
-                    <p className="text-sm text-gray-600">Order {idx + 1} - John Doe</p>
-                    <p className="text-sm text-gray-500">Details...</p>
-                  </div>
-                ))}
-              </div>
+              <div className="overflow-x-auto">
+            <table className="min-w-full text-sm text-left text-gray-700">
+              <thead className="bg-gray-200 text-xs uppercase">
+                <tr>
+                  <th className="px-4 py-2">Date</th>
+                  <th className="px-4 py-2">Girl's Name</th>
+                  <th className="px-4 py-2">Parent's Name</th>
+                  <th className="px-4 py-2">Cookies Ordered</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {latestOrders.map((order) => {
+                  const orderDate = new Date(order.timestamp.seconds * 1000).toLocaleString();
+                  const girl = order.girlName || "Unknown";
+                  const parent = order.parentName || "Unknown";
+                  const totalCookies = order.cookieSelections?.reduce(
+                    (sum, sel) => sum + Number(sel.numCookies || 0),
+                    0
+                  );
+
+                  return (
+                    <tr key={order.id} className="border-t">
+                      <td className="px-4 py-2">{orderDate}</td>
+                      <td className="px-4 py-2">{girl}</td>
+                      <td className="px-4 py-2">{parent}</td>
+                      <td className="px-4 py-2">{totalCookies}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
             </div>
 
             {/* Top Girl Scouts Box */}
