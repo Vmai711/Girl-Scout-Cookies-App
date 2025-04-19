@@ -188,7 +188,7 @@ const Transactions = () => {
                                             type="checkbox"
                                             name="responsibility"
                                             checked={acceptedResponsibility}
-                                            onChange={() => setAcceptedResponsibility(true)}
+                                            onChange={(e) => setAcceptedResponsibility(e.target.checked)}
                                             required
                                             className="mr-2"
                                         />

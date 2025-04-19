@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { db } from "../../firebase/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import Header from "../header";
 import SideBar from "../sidebar/sidebar";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { PieChart, Pie, Legend } from "recharts";
-import { useMemo } from "react";
-
 
 const colorPool = [
   "#FFB6C1", "#FFD700", "#87CEEB", "#FF69B4",
@@ -16,18 +14,20 @@ const colorPool = [
 
 const Dashboard = () => {
   const [orders, setOrders] = useState([]);
+  const [receipts, setReceipts] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [activeMonth, setActiveMonth] = useState(null);
   const [cookieColors, setCookieColors] = useState({});
-  const [showDateMenu, setShowDateMenu] = useState(false); // Menu toggle state
+  const [showDateMenu, setShowDateMenu] = useState(false);
+  const [showAllYear, setShowAllYear] = useState(false);
 
   const latestOrders = useMemo(() => {
-  return [...filteredOrders]
-    .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
-    .slice(0, 5);
-  }, [filteredOrders]);  
+    return [...filteredOrders]
+      .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
+      .slice(0, 5);
+  }, [filteredOrders]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -37,7 +37,14 @@ const Dashboard = () => {
       const ordersData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setOrders(ordersData);
       setFilteredOrders(ordersData);
-    }; 
+    };
+
+    const fetchReceipts = async () => {
+      const receiptsRef = collection(db, "receipts");
+      const snapshot = await getDocs(receiptsRef);
+      const receiptsData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setReceipts(receiptsData);
+    };
 
     const fetchCookieTypes = async () => {
       const cookieRef = collection(db, "cookieTypes");
@@ -46,15 +53,16 @@ const Dashboard = () => {
 
       const colors = {};
       cookieData.forEach((cookie, index) => {
-        colors[cookie] = colorPool[index % colorPool.length]; 
+        colors[cookie] = colorPool[index % colorPool.length];
       });
 
-      setCookieColors(colors); 
+      setCookieColors(colors);
     };
 
     fetchOrders();
+    fetchReceipts();
     fetchCookieTypes();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     if (startDate || endDate) {
@@ -77,7 +85,7 @@ const Dashboard = () => {
 
   const processSalesData = () => {
     const salesByMonth = {};
-    filteredOrders.forEach(({ timestamp, numCookies, cookieSelections }) => {
+    filteredOrders.forEach(({ timestamp, cookieSelections }) => {
       const date = new Date(timestamp.seconds * 1000);
       const month = `${date.getFullYear()}-${date.getMonth() + 1}`;
       let cookiesSold = 0;
@@ -91,49 +99,69 @@ const Dashboard = () => {
       }
     });
 
-    if (Object.keys(salesByMonth).length === 0) {
-      return [];  // Return an empty array if no data exists for the filtered orders
-    }
-
-    return Object.keys(salesByMonth).map((month) => ({ name: month, sales: salesByMonth[month] }));
+    return Object.keys(salesByMonth).map((month) => ({
+      name: month,
+      sales: salesByMonth[month],
+    }));
   };
 
   const processCookieSales = (month) => {
     const cookieSales = {};
-    if (month === null) {
-      filteredOrders.forEach(({ cookieSelections }) => {
-        cookieSelections.forEach(({ cookie, numCookies }) => {
-          const cookiesSold = Number(numCookies);
-          if (!isNaN(cookiesSold)) {
-            cookieSales[cookie] = (cookieSales[cookie] || 0) + cookiesSold;
-          }
-        });
-      });
-    } else {
-      filteredOrders
-        .filter(({ timestamp }) => {
+    const relevantOrders = month
+      ? filteredOrders.filter(({ timestamp }) => {
           const date = new Date(timestamp.seconds * 1000);
           return `${date.getFullYear()}-${date.getMonth() + 1}` === month;
         })
-        .forEach(({ cookieSelections }) => {
-          cookieSelections.forEach(({ cookie, numCookies }) => {
-            const cookiesSold = Number(numCookies);
-            if (!isNaN(cookiesSold)) {
-              cookieSales[cookie] = (cookieSales[cookie] || 0) + cookiesSold;
-            }
-          });
-        });
-    }
+      : filteredOrders;
 
-    const salesArray = Object.keys(cookieSales).map((cookie, index) => {
+    relevantOrders.forEach(({ cookieSelections }) => {
+      cookieSelections.forEach(({ cookie, numCookies }) => {
+        const cookiesSold = Number(numCookies);
+        if (!isNaN(cookiesSold)) {
+          cookieSales[cookie] = (cookieSales[cookie] || 0) + cookiesSold;
+        }
+      });
+    });
+
+    return Object.keys(cookieSales).map((cookie, index) => {
       if (!cookieColors[cookie]) {
         const newColor = colorPool[index % colorPool.length];
         setCookieColors((prevColors) => ({ ...prevColors, [cookie]: newColor }));
       }
       return { name: cookie, value: cookieSales[cookie] };
     });
+  };
 
-    return salesArray;
+  const getTopGirlScouts = () => {
+    const salesMap = {};
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+  
+    receipts.forEach(({ girlName, parentName, numberOfBoxesSold, timestamp }) => {
+      if (!timestamp || !timestamp.seconds) return;
+  
+      const date = new Date(timestamp.seconds * 1000);
+      const receiptMonth = date.getMonth() + 1;
+      const receiptYear = date.getFullYear();
+  
+      const matchesFilter = showAllYear
+        ? receiptYear === currentYear
+        : receiptYear === currentYear && receiptMonth === currentMonth;
+  
+      if (matchesFilter) {
+        const identifier = `${girlName || "Unknown"} (${parentName || "Unknown"})`;
+        salesMap[identifier] = (salesMap[identifier] || 0) + Number(numberOfBoxesSold || 0);
+      }
+    });
+  
+    return Object.entries(salesMap)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([identifier, total]) => {
+        const girlName = identifier.split(" (")[0]; 
+        return { girlName, total };
+      });
   };
 
   const handleClearFilters = () => {
@@ -144,12 +172,12 @@ const Dashboard = () => {
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
-      <SideBar page={"dashboard"}/>
+      <SideBar page={"dashboard"} />
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Dashboard"}/>
+        <Header page={"Dashboard"} />
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
-          <div className="bg-white p-6 rounded-md shadow-md">
-            {/* Header with date range and options */}
+          {/* Cookies Sold Graph */}
+          <div className="bg-white p-6 rounded-md shadow-md mb-8">
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h1 className="text-3xl font-bold">Cookies Sold</h1>
@@ -193,15 +221,11 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Display message if no data */}
-            {filteredOrders.length === 0 && (
+            {filteredOrders.length === 0 ? (
               <div className="text-center text-xl text-gray-600 mt-8">
                 <p>No orders in this date range</p>
               </div>
-            )}
-
-            {/* Render charts if there is data */}
-            {filteredOrders.length > 0 && (
+            ) : (
               <div className="mt-6">
                 <h2 className="text-xl font-semibold mb-4">Cookie Sales by Type</h2>
                 <div className="grid md:grid-cols-2 gap-6">
@@ -209,7 +233,7 @@ const Dashboard = () => {
                     <LineChart
                       data={processSalesData()}
                       onClick={(e) => {
-                        if (e && e.activePayload && e.activePayload.length > 0) {
+                        if (e?.activePayload?.length) {
                           setActiveMonth(e.activePayload[0].payload.name);
                         } else {
                           setActiveMonth(null);
@@ -224,9 +248,17 @@ const Dashboard = () => {
                   </ResponsiveContainer>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
-                      <Pie data={processCookieSales(activeMonth)} dataKey="value" nameKey="name" outerRadius={100}>
+                      <Pie
+                        data={processCookieSales(activeMonth)}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius={100}
+                      >
                         {processCookieSales(activeMonth).map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={cookieColors[entry.name] || colorPool[index % colorPool.length]} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={cookieColors[entry.name] || colorPool[index % colorPool.length]}
+                          />
                         ))}
                       </Pie>
                       <Tooltip />
@@ -236,60 +268,74 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
-
           </div>
+          <div className="flex flex-col lg:flex-row gap-8 mb-8">
 
-          {/* Gray Background Divider between boxes */}
-          <div className="bg-gray-200 my-8 h-px"></div>
-
-          {/* Boxes for Last Orders and Top Girl Scouts (Side by Side) */}
-          <div className="flex space-x-6">
-            {/* Last Orders Box */}
-            <div className="bg-white p-6 rounded-md shadow-md flex-1">
+            {/* Last Orders */}
+            <div className="bg-white p-6 rounded-md shadow-md w-full lg:w-1/2">
               <h3 className="text-xl font-semibold mb-4">Last Orders</h3>
               <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left text-gray-700">
-              <thead className="bg-gray-200 text-xs uppercase">
-                <tr>
-                  <th className="px-4 py-2">Date</th>
-                  <th className="px-4 py-2">Girl's Name</th>
-                  <th className="px-4 py-2">Parent's Name</th>
-                  <th className="px-4 py-2">Cookies Ordered</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                {latestOrders.map((order) => {
-                  const orderDate = new Date(order.timestamp.seconds * 1000).toLocaleString();
-                  const girl = order.girlName || "Unknown";
-                  const parent = order.parentName || "Unknown";
-                  const totalCookies = order.cookieSelections?.reduce(
-                    (sum, sel) => sum + Number(sel.numCookies || 0),
-                    0
-                  );
-
-                  return (
-                    <tr key={order.id} className="border-t">
-                      <td className="px-4 py-2">{orderDate}</td>
-                      <td className="px-4 py-2">{girl}</td>
-                      <td className="px-4 py-2">{parent}</td>
-                      <td className="px-4 py-2">{totalCookies}</td>
+                <table className="min-w-full text-sm text-left text-gray-700">
+                  <thead className="bg-gray-200 text-xs uppercase">
+                    <tr>
+                      <th className="px-4 py-2">Date</th>
+                      <th className="px-4 py-2">Girl's Name</th>
+                      <th className="px-4 py-2">Parent's Name</th>
+                      <th className="px-4 py-2">Cookies Ordered</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="bg-white">
+                    {latestOrders.map((order) => {
+                      const orderDate = new Date(order.timestamp.seconds * 1000).toLocaleString();
+                      const girl = order.girlName || "Unknown";
+                      const parent = order.parentName || "Unknown";
+                      const totalCookies = order.cookieSelections?.reduce(
+                        (sum, sel) => sum + Number(sel.numCookies || 0),
+                        0
+                      );
 
+                      return (
+                        <tr key={order.id} className="border-t">
+                          <td className="px-4 py-2">{orderDate}</td>
+                          <td className="px-4 py-2">{girl}</td>
+                          <td className="px-4 py-2">{parent}</td>
+                          <td className="px-4 py-2">{totalCookies}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            {/* Top Girl Scouts Box */}
-            <div className="bg-white p-6 rounded-md shadow-md flex-1">
-              <h3 className="text-xl font-semibold mb-4">Top Girl Scouts</h3>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-600">John Doe</p>
-                <p className="text-sm text-gray-600">John Doe</p>
-                <p className="text-sm text-gray-600">John Doe</p>
-                <p className="text-sm text-gray-600">John Doe</p>
+            {/* Top Girl Scouts */}
+            <div className="bg-white p-6 rounded-md shadow-md w-full lg:w-1/2">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold">Top Girl Scouts</h3>
+                <button
+                  onClick={() => setShowAllYear((prev) => !prev)}
+                  className="text-sm text-blue-600 underline hover:text-blue-800 transition"
+                >
+                  {showAllYear ? "Show This Month" : "Show All Year"}
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm text-left text-gray-700">
+                  <thead className="bg-gray-200 text-xs uppercase">
+                    <tr>
+                      <th className="px-4 py-2">Girl's Name</th>
+                      <th className="px-4 py-2">Cookies Sold</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white">
+                    {getTopGirlScouts().map(({ girlName, total }) => (
+                      <tr key={girlName} className="border-t">
+                        <td className="px-4 py-2">{girlName}</td>
+                        <td className="px-4 py-2">{total}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
