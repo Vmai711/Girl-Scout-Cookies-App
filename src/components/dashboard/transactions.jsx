@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/authContext';
 import { useNavigate } from 'react-router-dom';
-import { fetchCookieTypes} from '../../firebase/firestore';
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
+import { fetchCookieTypes, saveTransaction, addRewardPoints} from '../../firebase/firestore';
 
 import Header from '../header';
 import SideBar from '../sidebar/sidebar';
@@ -72,7 +70,8 @@ const Transactions = () => {
 
         
         try {
-            const transactionId = await addRewardPoints(currentUser.uid, numberOfBoxesSold); // Pass user ID
+            const transactionId = await saveTransaction(transactionData, currentUser.uid);
+            addRewardPoints(currentUser.uid, numberOfBoxesSold);
             alert(`Receipt submitted successfully! You have earned ${numberOfBoxesSold} points (ID: ${transactionId})`);
             localStorage.setItem("transactionData", JSON.stringify(transactionData));
             navigate("/transactionsummary", { state: transactionData });
@@ -81,25 +80,6 @@ const Transactions = () => {
             alert("There was an error submitting your order. Please try again.");
         }
     };
-
-    const addRewardPoints = async (userId, boxesSold) => {
-        const rewardRef = doc(db, "rewardPoints", userId);
-        const rewardSnap = await getDoc(rewardRef);
-    
-          if (rewardSnap.exists()) {
-            const prevPoints = rewardSnap.data().points || 0;
-            await updateDoc(rewardRef, {
-              points: prevPoints + boxesSold
-            });
-          } 
-          else {
-            await setDoc(rewardRef, {
-              userId,
-              points: boxesSold
-            });
-          }
-          return rewardRef.id;
-        };
     
     return (
         <div className="bg-custom-light-gray flex min-h-screen">

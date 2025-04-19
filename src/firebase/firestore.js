@@ -1,5 +1,5 @@
 import { db } from './firebase'; // Ensure this correctly imports your Firebase setup
-import { collection, addDoc, serverTimestamp, Timestamp, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 
 /**
  * Save an order to both the global 'orders' collection and the user's specific order collection.
@@ -56,26 +56,37 @@ export const fetchUserOrders = async (userId) => {
     }
 };
 
+export const addRewardPoints = async (userId, boxesSold) => {
+    const rewardRef = doc(db, "rewardPoints", userId);
+    const rewardSnap = await getDoc(rewardRef);
+
+      if (rewardSnap.exists()) {
+        const prevPoints = rewardSnap.data().points || 0;
+        await updateDoc(rewardRef, {
+          points: prevPoints + boxesSold
+        });
+      } 
+      else {
+        await setDoc(rewardRef, {
+          userId,
+          points: boxesSold
+        });
+      }
+    };
+
 /**
  * Fetch deadlines
  */
 export const fetchDeadlines = async () => {
-    const deadlinedoc = doc(db, "deadlines", "deadlines");
-    const snapshot = await getDoc(deadlinedoc);
-
+    const deadlinecollection = collection(db, "deadlines", "deadlines");
+    const snapshot = await getDoc(deadlinecollection);
     if (snapshot.exists()) {
         const data = snapshot.data();
-
         return {
-            preorderDeadline: data.preorderDeadline instanceof Timestamp
-                ? data.preorderDeadline.toDate()
-                : new Date(data.preorderDeadline),
-            orderDeadline: data.orderDeadline instanceof Timestamp
-                ? data.orderDeadline.toDate()
-                : new Date(data.orderDeadline),
+            preorderDeadline: data.preorderDeadline?.toDate(), 
+            orderDeadline: data.orderDeadline?.toDate()
         };
     }
-
     return null;
 };
 
@@ -83,18 +94,43 @@ export const fetchDeadlines = async () => {
  * Update deadlines
  */
 export const updateDeadlines = async (newDeadlines) => {
-    const deadlinedoc = doc(db, "deadlines", "deadlines");
-
-    const preorder = new Date(newDeadlines.preorderDeadline);
-    preorder.setDate(preorder.getDate() + 1); // optional: remove if not needed
-
-    const order = new Date(newDeadlines.orderDeadline);
-    order.setDate(order.getDate() + 1); // optional: remove if not needed
-
-    await updateDoc(deadlinedoc, {
-        preorderDeadline: Timestamp.fromDate(preorder),
-        orderDeadline: Timestamp.fromDate(order),
+    const deadlinecollection = collection(db, "deadlines", "deadlines");
+    await updateDoc(deadlinecollection, {
+        preorderDeadline: new Date(new Date(newDeadlines.preorderDeadline).setDate(new Date(newDeadlines.preorderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" }),
+        orderDeadline: new Date(new Date(newDeadlines.orderDeadline).setDate(new Date(newDeadlines.orderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" })
     });
+};
+
+/**
+ * Save transaction to Firestore
+ */
+export const saveTransaction = async (transactionData, userId) => {
+    try {
+        // Add transaction to 'receipts'
+        const docRef = await addDoc(collection(db, 'receipts'), {
+            ...transactionData,
+            timestamp: serverTimestamp() // Adds a timestamp for order tracking
+        });
+        return docRef.id; // Returns the order ID
+    } catch (error) {
+        console.error('Error saving order:', error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch all orders from the global 'orders' collection.
+ */
+export const fetchTransactions = async () => {
+    try {
+        const transactionsCollection = collection(db, "receipts");
+        const snapshot = await getDocs(transactionsCollection);
+        const transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return transactions;
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        throw error;
+    }
 };
 
 /**
@@ -102,12 +138,10 @@ export const updateDeadlines = async (newDeadlines) => {
  */
 export const saveReservation = async (boothData) => {
     try {
-        console.log("Saving booth reservation:", boothData);
         const docRef = await addDoc(collection(db, 'reservations'), {
             ...boothData,
             timestamp: serverTimestamp()
         });
-        console.log("Booth reserved successfully with ID:", docRef.id);
         return docRef.id;
     } catch (error) {
         console.error('Error saving reservation:', error);
