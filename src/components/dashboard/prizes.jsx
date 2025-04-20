@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase/firebase";
-import {doc, getDoc, setDoc } from "firebase/firestore";
+import {doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 
 import Header from "../header";
@@ -12,6 +12,7 @@ const Prizes = () => {
   const {currentUser} = useAuth();
   const [rewards, setRewards] = useState([]);
   const [userPoints, setUserPoints] = useState(0);
+  const [spendingPoints, setSpendingPoints] = useState(0);
 
   const [error, setError] = useState("");
   
@@ -51,7 +52,7 @@ const Prizes = () => {
           const userData = rewardSnap.data();
           setUserPoints(userData['points']);
         } else{
-          await setDoc(rewardRef, {userId: currentUser.uid, points: parseInt(0) })
+          await setDoc(rewardRef, {userId: currentUser.uid, points: parseInt(0) });
           setUserPoints(rewardSnap.data()['points']);
         }
       }
@@ -63,6 +64,24 @@ const Prizes = () => {
     };
     FetchRewardPoints();
   }, [currentUser, error]);
+
+  useEffect(() => {
+    const updateRewardPoints = async() => {
+      if(userPoints >= spendingPoints && spendingPoints > 0){
+        try{
+          const pointRef = doc(db, "rewardPoints", currentUser.uid);
+          await updateDoc(pointRef, {points: userPoints - spendingPoints});
+          setUserPoints(userPoints - spendingPoints);
+        } catch(error){
+          console.error("Error changing user's point value", error);
+        }
+        setSpendingPoints(0);
+      }
+    }
+    updateRewardPoints();
+  }, [currentUser, userPoints, spendingPoints])
+    
+  
  
 
   return (
@@ -72,13 +91,12 @@ const Prizes = () => {
       <div className="w-full h-fit sm:ml-64">
         <Header page={"Awards"}/>
         <main className="mt-[3.5rem] p-8">
-        <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
-          <h1 className="text-2xl font-bold mb-4">Rewards Page</h1>
-          <p>Manage your reward points.</p>
-          <p>{userPoints}</p>
-          <p>{currentUser.uid}</p>
-        </div>
-        <div style = {{display: "grid", gridTemplateColumns: "30% 30% 30%", columnGap: "5%", rowGap: "0%", paddingLeft: "5%", paddingRight: "5%", paddingTop: "5%"}}>
+        <div className="bg-white w-full mx-auto p-6 rounded-md shadow-md">
+          <h1 className="text-3xl font-bold mb-6 text-center">Rewards Page</h1>
+          <p className = "text-2xl font-bold text-center">Your Points: {userPoints}</p>
+          <p style = {{textAlign: "center"}}>Manage your reward points.</p>
+        
+        <div style = {{display: "grid", gridTemplateColumns: "30% 30% 30%", columnGap: "5%", rowGap: "0%", paddingLeft: "2.5%", paddingRight: "2.5%", paddingTop: "5%"}}>
           {rewards.length > 0 ? rewards.map((reward, index) => (
             <div key = {index} style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative", marginBottom: "15%"}}>
               <Dropdown
@@ -88,7 +106,10 @@ const Prizes = () => {
             </Dropdown>
             <img src = {reward.imageURL} alt = {reward.name} style = {{borderRadius: "50%"}}></img>
             <p style = {{textAlign: "center"}}>{reward.name}</p>
-            <button type = "button" className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2" style = {{position: 'relative', left: '50%', transform: 'translateX(-50%)', marginTop: "10px", width: "100%"}}>
+            <button type = "button" className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2" style = {{position: 'relative', left: '50%', transform: 'translateX(-50%)', marginTop: "10px", width: "100%"}}
+            onClick={() => {
+              setSpendingPoints(reward.pointCost);
+            }}>
               <p>{reward.pointCost} Orders</p>
             </button>
             </div>
@@ -108,7 +129,7 @@ const Prizes = () => {
             </button>
           </div> */}
 
-          
+        </div>  
         </div>
         </main>
       </div>
