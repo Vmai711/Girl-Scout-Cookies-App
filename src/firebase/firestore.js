@@ -56,6 +56,9 @@ export const fetchUserOrders = async (userId) => {
     }
 };
 
+/**
+ * Add reward points for a specific user based on number of boxes sold
+ */
 export const addRewardPoints = async (userId, boxesSold) => {
     const rewardRef = doc(db, "rewardPoints", userId);
     const rewardSnap = await getDoc(rewardRef);
@@ -75,11 +78,25 @@ export const addRewardPoints = async (userId, boxesSold) => {
     };
 
 /**
+ * Update rewards points based on transaction edits
+ */
+export const updateRewardPoints = async (transactionId, boxCount) => {
+  const transactionRef = doc(db, "transactions", transactionId);
+  try {
+    await updateDoc(transactionRef, {
+      rewardPoints: boxCount, // You can customize the calculation here
+    });
+  } catch (error) {
+    console.error("Error updating reward points:", error);
+  }
+};
+
+/**
  * Fetch deadlines
  */
 export const fetchDeadlines = async () => {
-    const deadlinecollection = collection(db, "deadlines", "deadlines");
-    const snapshot = await getDoc(deadlinecollection);
+    const deadlinedoc = doc(db, "deadlines", "deadlines");
+    const snapshot = await getDoc(deadlinedoc);
     if (snapshot.exists()) {
         const data = snapshot.data();
         return {
@@ -94,10 +111,11 @@ export const fetchDeadlines = async () => {
  * Update deadlines
  */
 export const updateDeadlines = async (newDeadlines) => {
-    const deadlinecollection = collection(db, "deadlines", "deadlines");
-    await updateDoc(deadlinecollection, {
-        preorderDeadline: new Date(new Date(newDeadlines.preorderDeadline).setDate(new Date(newDeadlines.preorderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" }),
-        orderDeadline: new Date(new Date(newDeadlines.orderDeadline).setDate(new Date(newDeadlines.orderDeadline).getDate() + 1)).toLocaleDateString("en-US", { timeZone: "America/Chicago" })
+    const deadlinedoc = doc(db, "deadlines", "deadlines");
+
+    await updateDoc(deadlinedoc, {
+        preorderDeadline: new Date(new Date(newDeadlines.preorderDeadline)),
+        orderDeadline: new Date(new Date(newDeadlines.orderDeadline))
     });
 };
 
@@ -130,6 +148,21 @@ export const fetchTransactions = async () => {
     } catch (error) {
         console.error("Error fetching orders:", error);
         throw error;
+    }
+};
+
+/**
+ * Update transaction
+ */
+export const updateTransaction = async (transactionId, updatedData) => {
+    const transactionRef = doc(db, "receipts", transactionId);
+    try {
+        await updateDoc(transactionRef, {
+          cookieSelections: updatedData.cookieSelections,
+          numberOfBoxesSold: updatedData.numberOfBoxesSold,
+        });
+      } catch (error) {
+        console.error("Error updating transaction:", error);
     }
 };
 

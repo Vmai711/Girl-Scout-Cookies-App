@@ -51,7 +51,7 @@ const Transactions = () => {
         e.preventDefault();
     
         if (!acceptedResponsibility) {
-            alert("You must accept financial responsibility before submitting.");
+            alert("You must confirm your form is correct before submitting.");
             return;
         }
 
@@ -182,7 +182,7 @@ const Transactions = () => {
 
                             {/* Financial Responsibility Agreement */}
                             <div className="mb-4">
-                                    <label className="block font-semibold">Make sure that everything is correct (boxes sold, date, and time)</label>
+                                    <label className="block font-semibold">Make sure that everything is correct</label>
                                     <div className="flex items-center">
                                         <input 
                                             type="checkbox"
@@ -192,7 +192,7 @@ const Transactions = () => {
                                             required
                                             className="mr-2"
                                         />
-                                        <span>I have confirmed that the number of boxes sold is correct</span>
+                                        <span>I have confirmed that the information on the form is correct</span>
                                     </div>
                                 </div>
 

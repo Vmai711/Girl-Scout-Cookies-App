@@ -20,6 +20,7 @@ import Order from "./components/order_form/order_form";
 import Booth from "./components/dashboard/booth";
 import Reservations from "./components/dashboard/reservations";
 import RoleChange from "./components/dashboard/tempRoleChange";
+import ManageTransaction from "./components/dashboard/manage_transactions";
 
 //Summary Components
 import BoothSummary from "./components/summary/boothsummary";
@@ -53,6 +54,7 @@ function App() {
     { path: "/transactionsummary", element: <TransactionSummary /> },
     { path: "/reservations", element: <Reservations /> },
     { path: "/rolechange", element: <RoleChange /> },
+    { path: "/manage-transactions", element: <ManageTransaction /> },
   ];
 
   let routesElement = useRoutes(routesArray);

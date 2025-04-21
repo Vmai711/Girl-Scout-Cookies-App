@@ -53,7 +53,7 @@ const ReservationTable = ({reservations}) => {
                             <div key={reservation.id} className="p-4 border rounded shadow-sm bg-gray-50">
                                 <p><strong>Girl's Name:</strong> {reservation.girlName}</p>
                                 <p><strong>Parent's Name:</strong> {reservation.parentName}</p>
-                                <p><strong>Pickup Location:</strong> {reservation.boothLocation}</p>
+                                <p><strong>Booth Location:</strong> {reservation.boothLocation}</p>
                                 <p><strong>Starting Time:</strong> {reservation.startingTime}</p>
                                 <p><strong>Timestamp:</strong> {reservation.timestamp ? new Date(reservation.timestamp.toDate()).toLocaleString() : "N/A"}</p>
                             </div>

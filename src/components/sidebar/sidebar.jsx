@@ -80,6 +80,18 @@ const SideBar = ({ page }) => {
               </div>
             </Link>
 
+            {!loading && (currentRole === "troop-leader" || currentRole === "admin") && (
+              <Link
+                to="/manage-transactions"
+                className={page === "manage transactions" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
+              >
+                <div className="flex gap-3">
+                  <UsersGroup />
+                  Manage Transactions Page
+                </div>
+              </Link>
+            )}
+
             <Link
               to="/inventory"
               className={page === "inventory" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
