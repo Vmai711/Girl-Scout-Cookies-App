@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+
 
 import { Table, Select } from "flowbite-react";
 import { AngleDown } from "flowbite-react-icons/outline";
@@ -6,12 +10,31 @@ import { AngleUp } from "flowbite-react-icons/outline";
 
 const OrderManagementTable = ({orders}) => {
     const [expandedRows, setExpandedRows] = useState([])
+    const [localOrders, setLocalOrders] = useState([])
+
+    useEffect(() => {
+        setLocalOrders(orders);
+    }, [orders])
 
     const toggleRow = (id) => {
         setExpandedRows(prev => ({
             ...prev,
             [id]: !prev[id]
         }));
+    }
+
+    const handleUpdateOrderStatus = async (orderID, newStatus) => {
+        const orderRef = doc(db, "orders", orderID);
+
+        await updateDoc(orderRef, {
+            orderStatus: newStatus
+        })
+
+        setLocalOrders(prevOrders =>
+            prevOrders.map(order => 
+                order.id === orderID ? { ...order, orderStatus: newStatus } : order
+            )
+        );
     }
 
     return (
@@ -27,7 +50,8 @@ const OrderManagementTable = ({orders}) => {
           </Table.HeadCell>
         </Table.Head>
         <Table.Body>
-            {orders.map((order) => (
+            {/* {orders.map((order) => ( */}
+            {localOrders.map((order) => (
                 <React.Fragment key={order.id}>
                     <Table.Row>
                         <Table.Cell>#123456</Table.Cell>
@@ -35,10 +59,18 @@ const OrderManagementTable = ({orders}) => {
                         <Table.Cell>$16.00</Table.Cell>
                         <Table.Cell>{order.timestamp ? new Date(order.timestamp.toDate()).toLocaleDateString() : "N/A"}</Table.Cell>
                         <Table.Cell>
-                            <Select id="Status" required>
-                                <option value="cancelled">Cancelled</option>
+                            <Select 
+                                id="Status" 
+                                required 
+                                value = {order.orderStatus || ""}
+                                onChange={(event) => handleUpdateOrderStatus(order.id, event.target.value)}
+                            >
                                 <option value="pending">Pending</option>
+                                <option value="cancelled">Cancelled</option>
                                 <option value="confirmed">Confirmed</option>
+                                {/* <option value="pending" disabled={order.orderStatus === "pending"}>Pending</option>
+                                <option value="cancelled" disabled={order.orderStatus === "cancelled"}>Cancelled</option>
+                                <option value="confirmed" disabled={order.orderStatus === "confirmed"}>Confirmed</option> */}
                             </Select>
                         </Table.Cell>
                         <Table.Cell>
