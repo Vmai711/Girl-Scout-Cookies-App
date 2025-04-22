@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useUserRole } from "../../firebase/roleUtils"; 
+import { useUserRole } from "../../firebase/roleUtils";
 import { Sidebar } from "flowbite-react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../../firebase/firebase";
@@ -18,12 +18,14 @@ import { Cart } from "flowbite-react-icons/outline";
 import { UsersGroup } from "flowbite-react-icons/outline";
 import { AddressBook } from "flowbite-react-icons/outline";
 import { Cog } from "flowbite-react-icons/outline";
+import { Bars } from "flowbite-react-icons/outline";
 
 const SideBar = ({ page }) => {
   const { currentRole, loading } = useUserRole();
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [user, setUser] = useState(null);
-  
+  const [collapsed, setCollapsed] = useState(false);
+
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -45,14 +47,29 @@ const SideBar = ({ page }) => {
   }, [user]);
 
   return (
-    <div>
-      <Sidebar aria-label="Default sidebar example" className="fixed top-0 left-0 z-4 [&>div]:bg-white">
-        <div>Cookie App</div>
+    <>
+      {/* Toggle button on mobile */}
+      <button
+        type="button"
+        className="fixed top-4 left-4 z-50 p-2 focus:outline-none md:hidden"
+        onClick={() => setCollapsed(!collapsed)}
+        aria-label="Toggle sidebar"
+      >
+        <Bars className="w-6 h-6 text-gray-700" />
+      </button>
+
+      {/* Sidebar hidden on mobile when collapsed, always show on bigger screens */}
+      <Sidebar
+        aria-label="Sidebar navigation"
+        className={`${collapsed ? 'hidden' : ''} fixed top-0 left-0 h-full md:block z-40 [&>div]:bg-white`}
+      >
+        {/* Space for mobile toggle overlap */}
+        <div className="pt-3 md:pt-0 text-center font-bold">Cookie Bytes</div>
         <Sidebar.Items>
           <Sidebar.ItemGroup>
             <Link
               to="/dashboard"
-              className={page === "dashboard" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
+                            className={page === "dashboard" ? "block text-center py-3 mb-2 rounded-md hover:bg-green-600 text-white p-2 bg-green-500" : "block text-center py-3 mb-2 rounded-md hover:bg-green-500 hover:text-white p-2 text-gray-600"}
             >
               <div className="flex gap-3">
                 <Grid />
@@ -66,7 +83,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3">
                 <Inbox />
-                Order Management Page
+                Orders Management
               </div>
             </Link>
 
@@ -76,7 +93,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3">
                 <AddressBook />
-                Reservations Page
+                Reservations
               </div>
             </Link>
 
@@ -87,7 +104,7 @@ const SideBar = ({ page }) => {
               >
                 <div className="flex gap-3">
                   <UsersGroup />
-                  Manage Transactions Page
+                  Manage Transactions
                 </div>
               </Link>
             )}
@@ -98,7 +115,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3">
                 <Inbox />
-                Inventory Page
+                Inventory
               </div>
             </Link>
 
@@ -108,7 +125,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3">
                 <Receipt />
-                Transaction Page
+                Transactions
               </div>
             </Link>
 
@@ -118,7 +135,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3">
                 <Palette />
-                Cookies Page
+                Cookies
               </div>
             </Link>
 
@@ -128,7 +145,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3 items-center relative">
                 <Messages />
-                Message Page
+                Messages
                 {unreadMessages > 0 && (
                   <span className="absolute right-[-15px] bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full relative">
                     {unreadMessages}
@@ -143,7 +160,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3">
                 <Award />
-                Rewards Page
+                Prizes
               </div>
             </Link>
 
@@ -153,7 +170,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3">
                 <Store />
-                Booth Page
+                Booth
               </div>
             </Link>
 
@@ -163,7 +180,7 @@ const SideBar = ({ page }) => {
             >
               <div className="flex gap-3">
                 <Cog />
-                Dev Role Change Page
+                Role Change
               </div>
             </Link>
 
@@ -174,11 +191,11 @@ const SideBar = ({ page }) => {
               >
                 <div className="flex gap-3">
                   <UsersGroup />
-                  Troops Page
+                  Troops
                 </div>
               </Link>
             )}
-            
+
             <Link
               to="/order_form"
               className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2"
@@ -191,7 +208,7 @@ const SideBar = ({ page }) => {
           </Sidebar.ItemGroup>
         </Sidebar.Items>
       </Sidebar>
-    </div>
+    </>
   );
 };
 
