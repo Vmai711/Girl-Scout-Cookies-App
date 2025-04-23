@@ -4,9 +4,8 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
 
-import { Table, Select } from "flowbite-react";
-import { AngleDown } from "flowbite-react-icons/outline";
-import { AngleUp } from "flowbite-react-icons/outline";
+import { Table, Select, Card } from "flowbite-react";
+import { AngleDown, AngleUp} from "flowbite-react-icons/outline";
 
 const OrderManagementTable = ({orders}) => {
     const [expandedRows, setExpandedRows] = useState([])
@@ -21,6 +20,15 @@ const OrderManagementTable = ({orders}) => {
             ...prev,
             [id]: !prev[id]
         }));
+    }
+
+    const totalCookiCostAmount = (cookies) => {
+        let amount = 0
+        cookies.forEach((cookie) => {
+            amount += cookie.numCookies * 6            
+        })
+        return amount
+
     }
 
     const handleUpdateOrderStatus = async (orderID, newStatus) => {
@@ -41,7 +49,8 @@ const OrderManagementTable = ({orders}) => {
       <Table>
         <Table.Head>
           <Table.HeadCell>Order ID</Table.HeadCell>
-          <Table.HeadCell>Customer</Table.HeadCell>
+          <Table.HeadCell>Girl Scout</Table.HeadCell>
+          <Table.HeadCell>Parent</Table.HeadCell>
           <Table.HeadCell>Total</Table.HeadCell>
           <Table.HeadCell>Date</Table.HeadCell>
           <Table.HeadCell>Status</Table.HeadCell>
@@ -56,7 +65,10 @@ const OrderManagementTable = ({orders}) => {
                     <Table.Row>
                         <Table.Cell>#123456</Table.Cell>
                         <Table.Cell>{order.girlName}</Table.Cell>
-                        <Table.Cell>$16.00</Table.Cell>
+                        <Table.Cell>{order.parentName}</Table.Cell>
+                        <Table.Cell>
+                            ${totalCookiCostAmount(order.cookieSelections)}.00
+                        </Table.Cell>
                         <Table.Cell>{order.timestamp ? new Date(order.timestamp.toDate()).toLocaleDateString() : "N/A"}</Table.Cell>
                         <Table.Cell>
                             <Select 
@@ -74,32 +86,32 @@ const OrderManagementTable = ({orders}) => {
                             </Select>
                         </Table.Cell>
                         <Table.Cell>
-                            <button onClick={() => toggleRow(order.id)}>
+                            <button className="cursor-pointer" onClick={() => toggleRow(order.id)}>
                                 {expandedRows[order.id] ? <div><AngleUp/></div> : <div><AngleDown/></div>}
                             </button>
                         </Table.Cell>
                     </Table.Row>
                     {expandedRows[order.id] && (
                         <Table.Row>
-                            <Table.Cell colSpan={6}>
-                            <div key={order.id} className="p-4 border rounded shadow-sm bg-gray-50">
-                                <p><strong>Girl's Name:</strong> {order.girlName}</p>
-                                <p><strong>Parent's Name:</strong> {order.parentName}</p>
-                                
-                                {/* Displaying multiple cookies */}
-                                <p><strong>Cookies:</strong></p>
-                                <ul className="list-disc pl-6">
-                                {order.cookieSelections?.map((cookieSelection, index) => (
-                                    <li key={index}>
-                                    {cookieSelection.cookie} ({cookieSelection.numCookies})
-                                    </li>
-                                ))}
-                                </ul>
-                                
-                                <p><strong>Pickup Location:</strong> {order.pickupLocation}</p>
-                                <p><strong>Contact Method:</strong> {order.contactMethod}</p>
-                                <p><strong>Timestamp:</strong> {order.timestamp ? new Date(order.timestamp.toDate()).toLocaleString() : "N/A"}</p>
-                            </div>
+                            <Table.Cell colSpan={7}>
+                                <Card key={order.id} className="bg-gray-50">
+                                    <p><strong>Girl's Name:</strong> {order.girlName}</p>
+                                    <p><strong>Parent's Name:</strong> {order.parentName}</p>
+                                    
+                                    {/* Displaying multiple cookies */}
+                                    <p><strong>Cookies:</strong></p>
+                                    <ul className="list-disc pl-6">
+                                    {order.cookieSelections?.map((cookieSelection, index) => (
+                                        <li key={index}>
+                                        {cookieSelection.cookie} ({cookieSelection.numCookies}) - <i>${(cookieSelection.numCookies * 6.00)}.00</i>
+                                        </li>
+                                    ))}
+                                    </ul>
+                                    
+                                    <p><strong>Pickup Location:</strong> {order.pickupLocation}</p>
+                                    <p><strong>Contact Method:</strong> {order.contactMethod}</p>
+                                    <p><strong>Timestamp:</strong> {order.timestamp ? new Date(order.timestamp.toDate()).toLocaleString() : "N/A"}</p>
+                                </Card>
                             </Table.Cell>
                         </Table.Row>
                     )}
