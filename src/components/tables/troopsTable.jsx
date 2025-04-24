@@ -3,6 +3,13 @@ import { Table, Avatar } from "flowbite-react";
 import { HiPencil } from "react-icons/hi";
 
 const TroopsTable = ({ users }) => {
+  const formatPhoneNumber = (phone) => {
+    if (!phone) return "N/A";
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length !== 10) return "Invalid";
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  };
+
   return (
     <Table hoverable>
       <Table.Head>
@@ -27,7 +34,7 @@ const TroopsTable = ({ users }) => {
                 </div>
               </div>
             </Table.Cell>
-            <Table.Cell>N/A</Table.Cell> {/* No phone in Firestore */}
+            <Table.Cell>{formatPhoneNumber(user.phone)}</Table.Cell>
             <Table.Cell>{user.currentRole || "N/A"}</Table.Cell>
             <Table.Cell>
               {user.createdAt?.toDate

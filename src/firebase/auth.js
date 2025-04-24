@@ -10,22 +10,25 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-export const doCreateUserWithEmailAndPassword = async (email, password, role) => {
+export const doCreateUserWithEmailAndPassword = async (email, password, role, name, phone = '') => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
   const userRoles = Array.isArray(role) ? role : [role];
 
   await setDoc(doc(db, "users", user.uid), {
-      uid: user.uid,
-      email,
-      role: userRoles,
-      currentRole: userRoles[0],
-      createdAt: new Date()
+    uid: user.uid,
+    email,
+    name,
+    phone,
+    role: userRoles,
+    currentRole: userRoles[0],
+    createdAt: new Date()
   });
 
   return user;
 };
+
 
 export const doSignInWithEmailAndPassword = (email, password) => {
   return signInWithEmailAndPassword(auth, email, password);
