@@ -19,6 +19,15 @@ export const saveOrder = async (orderData, userId) => {
             timestamp: serverTimestamp() // Ensures the same timestamp format
         });
 
+        await addDoc(collection(db, 'messages'), {
+              text: `🆕 New order #${globalOrderRef.id} from ${orderData.parentName || orderData.email}`,
+              timestamp: serverTimestamp(),
+              uid: userId,
+              senderName: orderData.parentName || orderData.email || 'Unknown',
+              recipientId: 'orders',
+              read: false,
+            });
+
         return globalOrderRef.id; // Returns the order ID
     } catch (error) {
         console.error('Error saving order:', error);
@@ -68,7 +77,7 @@ export const addRewardPoints = async (userId, boxesSold) => {
         await updateDoc(rewardRef, {
           points: prevPoints + boxesSold
         });
-      } 
+      }
       else {
         await setDoc(rewardRef, {
           userId,
@@ -100,7 +109,7 @@ export const fetchDeadlines = async () => {
     if (snapshot.exists()) {
         const data = snapshot.data();
         return {
-            preorderDeadline: data.preorderDeadline?.toDate(), 
+            preorderDeadline: data.preorderDeadline?.toDate(),
             orderDeadline: data.orderDeadline?.toDate()
         };
     }
