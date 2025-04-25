@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase/firebase";
-import {doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {doc, addDoc, getDoc, setDoc, updateDoc, collection, serverTimestamp } from "firebase/firestore";
 
 
 import Header from "../header";
@@ -10,14 +10,18 @@ import { useAuth } from "../../contexts/authContext";
 
 const Prizes = () => {
   const {currentUser} = useAuth();
+  const [troopLeaderId, setTroopLeaderId] = useState("lQcBfmuz60OHhvw9a3mIlHj0csJ2");
   const [rewards, setRewards] = useState([]);
   const [userPoints, setUserPoints] = useState(0);
   const [spendingPoints, setSpendingPoints] = useState(0);
+  const [redeemedReward, setRedeemedReward] = useState("");
 
   const [error, setError] = useState("");
   
-  useEffect(() => {
 
+
+  useEffect(() => {
+    //get all available rewards from db
     const FetchRewards = async() => {
       try{
         const rewardsRef = doc(db, "rewards", "exampleRewards");
@@ -42,7 +46,7 @@ const Prizes = () => {
   }, [rewards]);
 
   useEffect(() => {
-    
+    //get user's points from db
     const FetchRewardPoints = async() => {
 
       try{
@@ -66,20 +70,54 @@ const Prizes = () => {
   }, [currentUser, error]);
 
   useEffect(() => {
+    //update the user's points after redeeming points
     const updateRewardPoints = async() => {
       if(userPoints >= spendingPoints && spendingPoints > 0){
         try{
           const pointRef = doc(db, "rewardPoints", currentUser.uid);
           await updateDoc(pointRef, {points: userPoints - spendingPoints});
-          setUserPoints(userPoints - spendingPoints);
+          await addDoc(collection(db, "messages"), {
+            text: "You redeemed " + redeemedReward + " for " + spendingPoints + " points",
+            timestamp: serverTimestamp(),
+            uid: "9xG5jdYz5eQ9ya5CMvrW4z7WHAm2",
+            senderName: "Points Manager",
+            recipientId: currentUser.uid,
+            read: false,
+          });
+          await addDoc(collection(db, "messages"), {
+            text: " " + currentUser.email + " redeemed " + redeemedReward + " for " + spendingPoints + " points",
+            timestamp: serverTimestamp(),
+            uid: "9xG5jdYz5eQ9ya5CMvrW4z7WHAm2",
+            senderName: "Points Manager",
+            recipientId: troopLeaderId,
+            read: false,
+          });
+          // const usersRef = collection(db, "users");
+          // const q = query(usersRef, where("role", "array-contains", "troop-leader"));
+          // const managerIds = await getDocs(q);
+          // for (const element of managerIds){
+
+          //   await addDoc(collection(db, "messages"), {
+          //     text: "" + currentUser.email + " redeemed " + redeemedReward +" for " + spendingPoints + " points",
+          //     timestamp : serverTimestamp(),
+          //     uid: -1,
+          //     senderName: "Points Manager",
+          //     recipientId: element.data()['uid'],
+          //     read: false,
+          //   });
+          // }
+
         } catch(error){
           console.error("Error changing user's point value", error);
         }
+        setUserPoints(userPoints - spendingPoints);
         setSpendingPoints(0);
+        setRedeemedReward("");
+        setTroopLeaderId("lQcBfmuz60OHhvw9a3mIlHj0csJ2");
       }
     }
     updateRewardPoints();
-  }, [currentUser, userPoints, spendingPoints])
+  }, [currentUser, userPoints, spendingPoints, redeemedReward, troopLeaderId])
     
   
  
@@ -95,6 +133,7 @@ const Prizes = () => {
           <h1 className="text-3xl font-bold mb-6 text-center">Rewards Page</h1>
           <p className = "text-2xl font-bold text-center">Your Points: {userPoints}</p>
           <p style = {{textAlign: "center"}}>Manage your reward points.</p>
+          <p>{spendingPoints}</p>
         
         <div style = {{display: "grid", gridTemplateColumns: "30% 30% 30%", columnGap: "5%", rowGap: "0%", paddingLeft: "2.5%", paddingRight: "2.5%", paddingTop: "5%"}}>
           {rewards.length > 0 ? rewards.map((reward, index) => (
@@ -109,6 +148,7 @@ const Prizes = () => {
             <button type = "button" className="block text-center bg-green-500 text-white py-3 mb-2 rounded-md shadow hover:bg-green-600 p-2" style = {{position: 'relative', left: '50%', transform: 'translateX(-50%)', marginTop: "10px", width: "100%"}}
             onClick={() => {
               setSpendingPoints(reward.pointCost);
+              setRedeemedReward(reward.name);
             }}>
               <p>{reward.pointCost} Orders</p>
             </button>
