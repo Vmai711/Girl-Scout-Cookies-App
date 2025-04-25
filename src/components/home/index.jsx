@@ -44,7 +44,7 @@ const Index = () => {
 
         {/* Buttons instead of Links to update role */}
         <button
-          onClick={() => handleRoleSelection("parent/scout")}
+          onClick={() => handleRoleSelection("parent-scout")}
           className="block w-full text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
           Parent/Scout Page
