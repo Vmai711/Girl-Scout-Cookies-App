@@ -12,12 +12,12 @@ const Header = ({ page }) => {
     const { currentRole } = useUserRole(); // Destructure both roles and mainRole
 
     return (
-        <Navbar fluid rounded className='fixed top-0 w-[calc(100%-16rem)] z-50'>
+        <Navbar fluid rounded className='top-1 w-100 justify-right'>
             <Navbar.Brand>
                 <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">{page}</span>
             </Navbar.Brand>
-            <div className="flex md:order-2 relative z-50"> 
-                <div className="relative"> 
+            <div className="flex md:order-2 relative z-50">
+                <div className="relative">
                     <Dropdown
                         arrowIcon={false}
                         inline
@@ -28,7 +28,7 @@ const Header = ({ page }) => {
                             <span className="block text-sm">{currentUser?.displayName || 'User'}</span>
                             <span className="block truncate text-sm font-medium">{currentUser?.email}</span>
                             {/* Display the mainRole (current role) */}
-                            <span className="block text-xs text-gray-500">{currentRole || 'Loading role...'}</span> 
+                            <span className="block text-xs text-gray-500">{currentRole || 'Loading role...'}</span>
                         </Dropdown.Header>
                         <Dropdown.Item>Settings</Dropdown.Item>
                         <Dropdown.Divider />
@@ -38,12 +38,12 @@ const Header = ({ page }) => {
                                     ?
                                     <>
                                         {/* Logout option */}
-                                        <Dropdown.Item 
-                                            onClick={() => { 
-                                                doSignOut().then(() => { 
-                                                    navigate('/login'); 
-                                                }); 
-                                            }} 
+                                        <Dropdown.Item
+                                            onClick={() => {
+                                                doSignOut().then(() => {
+                                                    navigate('/login');
+                                                });
+                                            }}
                                             className='text-sm text-blue-600 underline'
                                         >
                                             Logout
@@ -59,7 +59,6 @@ const Header = ({ page }) => {
                         </Dropdown.Item>
                     </Dropdown>
                 </div>
-                <Navbar.Toggle />
             </div>
         </Navbar>
     );
