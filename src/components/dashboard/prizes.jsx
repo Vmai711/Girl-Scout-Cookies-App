@@ -132,7 +132,7 @@ const Prizes = () => {
         </div>
         <main className="mt-[3.5rem] p-8">
         <div className="bg-white w-full mx-auto p-6 rounded-md shadow-md">
-          <h1 className="text-3xl font-bold mb-6 text-center"></h1>
+          <h1 className="text-3xl font-bold mb-6 text-center">Rewards</h1>
           <p className = "text-2xl font-bold text-center">Your Points: {userPoints}</p>
           <p style = {{textAlign: "center"}}>Manage your reward points.</p>
           <p>{spendingPoints}</p>

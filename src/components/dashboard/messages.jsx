@@ -22,7 +22,7 @@ const Messages = () => {
     if (isCookieManager && !selectedRecipient) {
       setSelectedRecipient('orders');
     }
-  }, [isCookieManager]);
+  }, [isCookieManager,selectedRecipient]);
 
   // Auth listener
   useEffect(() => {
