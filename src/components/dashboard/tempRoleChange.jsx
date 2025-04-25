@@ -67,24 +67,26 @@ const RoleChange = () => {
 
   const handleSetcurrentRole = async (role) => {
     if (!currentUser) return;
-  
+
     const userRef = doc(db, "users", currentUser.uid);
     await updateDoc(userRef, {
       currentRole: role,
     });
-  
+
     setcurrentRole(role);
     setMessage(`Set main role to: ${role}`);
-  
+
     window.location.reload();
   };
-  
+
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar page={"rolechange"}/>
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Role Management"} />
+        <div className="ml-20 md:ml-0">
+          <Header page={"Role Management"} />
+        </div>
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
           <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
             <h1 className="text-2xl font-bold mb-4">Role Testing Page</h1>

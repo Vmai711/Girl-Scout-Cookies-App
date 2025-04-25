@@ -26,7 +26,9 @@ const Troops = () => {
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar page={"troops"} />
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Troops"} />
+        <div className="ml-20 md:ml-0">
+          <Header page={"Troop"} />
+        </div>
         <main className="mt-[3.5rem] p-8">
           <div className="bg-white w-full mx-auto p-6 rounded-md shadow-md">
             <h1 className="text-2xl font-bold mb-4">Troops Page</h1>

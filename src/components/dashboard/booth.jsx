@@ -9,11 +9,11 @@ import SideBar from "../sidebar/sidebar";
 
 const Booth = () => {
     const navigate = useNavigate();
-    
+
     // Get logged-in user's email
     const { currentUser } = useAuth();
     const role = useUserRole();
-    
+
     const [girlName, setGirlName] = useState('');
     const [parentName, setParentName] = useState('');
     const [boothLocations, setBoothLocations] = useState([]);
@@ -35,7 +35,7 @@ const Booth = () => {
                 console.error("Error fetching locations:", error);
             }
         };
-    
+
         getLocations();
     }, []);
 
@@ -47,12 +47,12 @@ const Booth = () => {
             setBoothLocation(newLocation); // Set the current booth location to the new location
             setNameLocation(''); // Clear name input
             setAddressLocation(''); // Clear address input
-    
+
             const locationData = {
                 nameLocation,
                 addressLocation,
             };
-    
+
             try {
                 const locationId = await saveLocation(locationData);  // Save to Firestore
                 alert(`Location ${nameLocation} at ${addressLocation} has been saved successfully! (ID: ${locationId})`);
@@ -73,7 +73,7 @@ const Booth = () => {
     startTime.setHours(startHour, 0, 0, 0); // Start at the given startHour, at minute 0
     let endTime = new Date();
     endTime.setHours(endHour, 0, 0, 0); // End at the given endHour, at minute 0
-    
+
     while (startTime <= endTime) {
         const hour = startTime.getHours();
         const minute = startTime.getMinutes();
@@ -81,21 +81,21 @@ const Booth = () => {
         times.push(formattedTime);
         startTime.setMinutes(startTime.getMinutes() + interval); // Increment by interval
     }
-    
+
     return times;
 };
 
     const timeSlots = generateTimeSlots(15, 7, 19); // Generate 15-minute intervals;
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         // Make sure 'acceptedResponsibility' is checked before proceeding
         if (!acceptedResponsibility) {
             alert("You must accept financial responsibility before submitting.");
             return;
         }
-    
+
         // Data to be sent to the firebase collections database
         const boothData = {
             email: currentUser?.email || '',
@@ -107,32 +107,34 @@ const Booth = () => {
             acceptedResponsibility,
             timestamp: new Date()
         };
-        
+
         console.log("Booth Data before saving:", boothData); // Debugging log
-        
-    
+
+
         try {
-            const boothId = await saveReservation(boothData);  
+            const boothId = await saveReservation(boothData);
             alert(`Booth has been reserved successfully! (ID: ${boothId}) ${boothLocation.nameLocation} at ${boothLocation.addressLocation} has been reserved for ${startingTime} on ${date}`);
-    
-            localStorage.setItem("boothData", JSON.stringify(boothData)); 
+
+            localStorage.setItem("boothData", JSON.stringify(boothData));
             // Redirect only if the order is successfully submitted
             navigate("/boothsummary", { state: boothData });
-         
+
         } catch (error) {
             // Stay on the page by not calling `navigate`
             console.error("Error reserving booth:", error);
             alert("There was an error reserving the booth. Please try again.");
         }
     };
-    
+
 
     return (
         <div className="bg-custom-light-gray flex min-h-screen">
         <SideBar page={"booth"}/>
-  
+
         <div className="w-full h-fit sm:ml-64">
-          <Header page={"Booth"}/>
+          <div className="ml-20 md:ml-0">
+            <Header page={"Booth"} />
+          </div>
           <main className="mt-[3.5rem] p-8">
             <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
                 <h2 className="text-2xl font-bold mb-4">Booth Reservation Form</h2>
@@ -142,7 +144,7 @@ const Booth = () => {
                     {/* Email (Autofilled) */}
                     <div className="mb-4">
                         <label className="block font-semibold">Email:</label>
-                        <input 
+                        <input
                             type="email"
                             value={currentUser?.email || ''}
                             readOnly
@@ -153,7 +155,7 @@ const Booth = () => {
                     {/* Girl's Name */}
                     <div className="mb-4">
                         <label className="block font-semibold">Girl's Name:</label>
-                        <input 
+                        <input
                             type="text"
                             value={girlName}
                             onChange={(e) => setGirlName(e.target.value)}
@@ -165,7 +167,7 @@ const Booth = () => {
                     {/* Parent's Name */}
                     <div className="mb-4">
                         <label className="block font-semibold">Parent's Name:</label>
-                        <input 
+                        <input
                             type="text"
                             value={parentName}
                             onChange={(e) => setParentName(e.target.value)}
@@ -173,7 +175,7 @@ const Booth = () => {
                             className="w-full p-2 border rounded"
                         />
                     </div>
-                    
+
                     {/* Booth Location */}
                     <div className="mb-4">
                         <label className="block font-semibold">Booth Location:</label>
@@ -212,7 +214,7 @@ const Booth = () => {
                                 <option value="Add Location">Add Location</option>
                             )}
                         </select>
-                    
+
                         {/* Show input fields only when "Add Location" is selected */}
                         {boothLocation.nameLocation === "Add Location" && (
                             <div className="mt-2">
@@ -232,7 +234,7 @@ const Booth = () => {
                                     placeholder="Enter Location Address"
                                     className="w-full p-2 border rounded"
                                 />
-                                <button 
+                                <button
                                     type="button"
                                     onClick={handleAddLocation}
                                     className="mt-2 p-2 bg-blue-500 text-white rounded"
@@ -277,7 +279,7 @@ const Booth = () => {
                     <div className="mb-4">
                         <label className="block font-semibold">Make sure that you have selected the correct booth as well as the correct date and time:</label>
                         <div className="flex items-center">
-                            <input 
+                            <input
                                 type="checkbox"
                                 name="responsibility"
                                 checked={acceptedResponsibility}
@@ -290,7 +292,7 @@ const Booth = () => {
                     </div>
 
                     {/* Submit Button */}
-                    <button 
+                    <button
                         type="submit"
                         className={`w-full text-white p-2 rounded transition ${acceptedResponsibility ? 'bg-green-500 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
                         disabled={!acceptedResponsibility}
@@ -300,8 +302,8 @@ const Booth = () => {
                 </form>
 
                 {/* Back Button */}
-                <button 
-                    onClick={() => navigate(-1)} 
+                <button
+                    onClick={() => navigate(-1)}
                     className="mt-4 w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-700 transition"
                 >
                     Go Back

@@ -16,7 +16,7 @@ const Cookies = () => {
   const [showEditButtons, setShowEditButtons] = useState(false);
   const [newCookie, setNewCookie] = useState({ name: "", imageUrl: "", description: "" });
   const [showAddForm, setShowAddForm] = useState(false);
-  const { currentRole } = useUserRole(); 
+  const { currentRole } = useUserRole();
 
   const [imageUpload, setImageUpload] = useState(null);
 
@@ -25,7 +25,7 @@ const Cookies = () => {
       try {
         const docRef = doc(db, "cookieTypes", "Cookie Types Config");
         const docSnap = await getDoc(docRef);
-    
+
         if (docSnap.exists()) {
           const cookieData = docSnap.data();
           const formattedCookies = Object.entries(cookieData).map(([cookieName, details]) => ({
@@ -33,7 +33,7 @@ const Cookies = () => {
             imageUrl: details[0],
             description: details[1],
           }));
-    
+
           formattedCookies.sort((a, b) => a.name.localeCompare(b.name));
           setCookies(formattedCookies);
         }
@@ -92,12 +92,12 @@ const Cookies = () => {
           [editingCookie.editableName]: [
             editingCookie.imageUrl,
             editingCookie.description,
-            editingCookie.editableName, 
+            editingCookie.editableName,
           ],
           // Optionally delete the old cookie name
           [editingCookie.name]: deleteField(),
         });
-        
+
         // Immediately update the local state to reflect the change
         setCookies(cookies.map(cookie =>
           cookie.name === editingCookie.name
@@ -113,7 +113,7 @@ const Cookies = () => {
             editingCookie.editableName,
           ],
         });
-        
+
         // Updates local state
         setCookies(cookies.map(cookie =>
           cookie.name === editingCookie.name
@@ -204,17 +204,19 @@ const Cookies = () => {
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar page={"cookies"}/>
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Cookies"} />
+        <div className="ml-20 md:ml-0">
+          <Header page={"Cookies"} />
+        </div>
         <main className="mt-[3.5rem] p-8">
           <div className="bg-white w-full mx-auto p-6 rounded-md shadow-md">
             <h1 className="text-3xl font-bold mb-6 text-center">Manage Cookies</h1>
 
-            {currentRole === "cookie-manager" && (  
+            {currentRole === "cookie-manager" && (
               <div className="flex justify-center mb-4">
                 <button
                   onClick={() => {
                     setShowEditButtons(!showEditButtons)
-                    setEditingCookie()}} 
+                    setEditingCookie()}}
                   className="bg-blue-500 text-white px-4 py-2 rounded mr-4"
                 >
                   {showEditButtons ? "Cancel" : "Edit Cookies"}
@@ -247,8 +249,8 @@ const Cookies = () => {
                   placeholder="Cookie Name"
                   className="w-full p-2 border rounded mb-2"
                 />
-                <input 
-                  type="file" 
+                <input
+                  type="file"
                   onChange={(event) => {setImageUpload(event.target.files[0])}}
                 />
                 <textarea
@@ -282,9 +284,9 @@ const Cookies = () => {
                     )}
                   </h2>
                   {editingCookie?.name === cookie.name ? (
-                    <input 
-                      type="file" 
-                      name="editImg" 
+                    <input
+                      type="file"
+                      name="editImg"
                       id="editImg"
                       onChange={(event) => {setImageUpload(event.target.files[0])}}
                       className="w-full p-2 border rounded mb-2"
@@ -303,7 +305,7 @@ const Cookies = () => {
                     <p className="text-gray-600 mt-2">{cookie.description}</p>
                   )}
 
-                  {currentRole === "cookie-manager" && showEditButtons && (  
+                  {currentRole === "cookie-manager" && showEditButtons && (
                     <>
                       <div className="absolute top-2 right-2">
                         <button

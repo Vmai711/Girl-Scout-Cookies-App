@@ -16,7 +16,7 @@ const Transactions = () => {
     const [date, setDate] = useState("");
     const [acceptedResponsibility, setAcceptedResponsibility] = useState(false);
     const [cookieTypes, setCookieTypes] = useState([]);
-    
+
 
     // Fetch the cookie types from Firestore when the component mounts
     useEffect(() => {
@@ -28,9 +28,9 @@ const Transactions = () => {
                 console.error("Error fetching cookie types:", error);
             }
         };
-  
+
         getCookieTypes();
-    }, []);    
+    }, []);
 
     const handleCookieChange = (index, field, value) => {
         const newCookieSelections = [...cookieSelections];
@@ -49,7 +49,7 @@ const Transactions = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (!acceptedResponsibility) {
             alert("You must confirm your form is correct before submitting.");
             return;
@@ -58,7 +58,7 @@ const Transactions = () => {
         const numberOfBoxesSold = cookieSelections.reduce((total, selection) => {
             return total + parseInt(selection.numCookies || 0, 10);
         }, 0);
-    
+
         const transactionData = {
             email: currentUser?.email || '',
             girlName,
@@ -68,7 +68,7 @@ const Transactions = () => {
             acceptedResponsibility,
         };
 
-        
+
         try {
             const transactionId = await saveTransaction(transactionData, currentUser.uid);
             addRewardPoints(currentUser.uid, numberOfBoxesSold);
@@ -80,22 +80,24 @@ const Transactions = () => {
             alert("There was an error submitting your order. Please try again.");
         }
     };
-    
+
     return (
         <div className="bg-custom-light-gray flex min-h-screen">
             <SideBar />
             <div className="w-full h-fit sm:ml-64">
-                <Header page={"Transaction Page"}/>
+                <div className="ml-20 md:ml-0">
+                    <Header page={"Transactions"} />
+                </div>
                 <main className="mt-[3.5rem] p-8">
                     <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
                         <h2 className="text-2xl font-bold mb-4">Transaction/Receipt Form</h2>
-                        
+
                         <form onSubmit={handleSubmit}>
 
                             {/* Email (Autofilled) */}
                             <div className="mb-4">
                                 <label className="block font-semibold">Email:</label>
-                                <input 
+                                <input
                                     type="email"
                                     value={currentUser?.email || ''}
                                     readOnly
@@ -106,7 +108,7 @@ const Transactions = () => {
                             {/* Girl's Name */}
                             <div className="mb-4">
                                 <label className="block font-semibold">Girl's Name:</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={girlName}
                                     onChange={(e) => setGirlName(e.target.value)}
@@ -118,7 +120,7 @@ const Transactions = () => {
                             {/* Parent's Name */}
                             <div className="mb-4">
                                 <label className="block font-semibold">Parent's Name:</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={parentName}
                                     onChange={(e) => setParentName(e.target.value)}
@@ -154,7 +156,7 @@ const Transactions = () => {
                                                 <option key={i} value={cookie}>{cookie}</option>
                                             ))}
                                         </select>
-                                        <input 
+                                        <input
                                             type="number"
                                             value={cookieSelection.numCookies}
                                             onChange={(e) => handleCookieChange(index, 'numCookies', e.target.value)}
@@ -184,7 +186,7 @@ const Transactions = () => {
                             <div className="mb-4">
                                     <label className="block font-semibold">Make sure that everything is correct</label>
                                     <div className="flex items-center">
-                                        <input 
+                                        <input
                                             type="checkbox"
                                             name="responsibility"
                                             checked={acceptedResponsibility}
@@ -197,8 +199,8 @@ const Transactions = () => {
                                 </div>
 
                             {/* Submit Button */}
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 className={`w-full text-white p-2 rounded transition ${acceptedResponsibility ? 'bg-green-500 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
                                 disabled={!acceptedResponsibility}
                             >

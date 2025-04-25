@@ -79,7 +79,9 @@ const Inventory = () => {
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar page={"inventory"}/>
       <div className="w-full sm:ml-64 h-fit">
-        <Header page={"Inventory Management"} />
+        <div className="ml-20 md:ml-0">
+          <Header page={"Inventory Management"} />
+        </div>
         <main className="mt-[3.5rem] p-8">
           <div className="bg-white max-w-4xl mx-auto p-6 rounded-md shadow-md">
             <div className="flex justify-between items-center mb-6">

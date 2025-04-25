@@ -10,7 +10,7 @@ import SideBar from '../sidebar/sidebar';
 const Order = () => {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
-    const { currentRole } = useUserRole(); 
+    const { currentRole } = useUserRole();
 
     const [girlName, setGirlName] = useState('');
     const [parentName, setParentName] = useState('');
@@ -21,7 +21,7 @@ const Order = () => {
     const [cookieTypes, setCookieTypes] = useState([]);
 
     const [deadlines, setDeadlines] = useState({ preorderDeadline: null, orderDeadline: null });
-    const [editingDeadlines, setEditingDeadlines] = useState(false);    
+    const [editingDeadlines, setEditingDeadlines] = useState(false);
 
     // Fetch preorder and order deadlines from Firebase
     useEffect(() => {
@@ -30,7 +30,7 @@ const Order = () => {
                 const data = await fetchDeadlines();
                 if (data) {
                     setDeadlines({
-                        preorderDeadline: data.preorderDeadline?.toISOString().split("T")[0], 
+                        preorderDeadline: data.preorderDeadline?.toISOString().split("T")[0],
                         orderDeadline: data.orderDeadline?.toISOString().split("T")[0]
                     });
                 }
@@ -38,7 +38,7 @@ const Order = () => {
                 console.error("Error fetching deadlines:", err);
             }
         };
-    
+
         getDeadlines();
     }, []);
 
@@ -52,9 +52,9 @@ const Order = () => {
                 console.error("Error fetching cookie types:", error);
             }
         };
-    
+
         getCookieTypes();
-    }, []);    
+    }, []);
 
     const handleCookieChange = (index, field, value) => {
         const newCookieSelections = [...cookieSelections];
@@ -73,12 +73,12 @@ const Order = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         if (!acceptedResponsibility) {
             alert("You must accept financial responsibility before submitting.");
             return;
         }
-    
+
         const orderData = {
             email: currentUser?.email || '',
             girlName,
@@ -88,7 +88,7 @@ const Order = () => {
             contactMethod,
             acceptedResponsibility,
         };
-    
+
         try {
             const orderId = await saveOrder(orderData, currentUser.uid); // Pass user ID
             alert(`Order submitted successfully! Your Order ID is: ${orderId}`);
@@ -99,12 +99,14 @@ const Order = () => {
             alert("There was an error submitting your order. Please try again.");
         }
     };
-    
+
     return (
         <div className="bg-custom-light-gray flex min-h-screen">
             <SideBar />
             <div className="w-full h-fit sm:ml-64">
-                <Header page={"Order Form"}/>
+                <div className="ml-20 md:ml-0">
+                 <Header page={"Order Form"} />
+                </div>
                 <main className="mt-[3.5rem] p-8">
                     <div className="bg-white max-w-lg mx-auto p-6 rounded-md shadow-md">
                         <h2 className="text-2xl font-bold mb-4">Girl Scout Cookie Order Form</h2>
@@ -166,13 +168,13 @@ const Order = () => {
                             )}
                         </div>
 
-                        
+
                         <form onSubmit={handleSubmit}>
 
                             {/* Email (Autofilled) */}
                             <div className="mb-4">
                                 <label className="block font-semibold">Email:</label>
-                                <input 
+                                <input
                                     type="email"
                                     value={currentUser?.email || ''}
                                     readOnly
@@ -183,7 +185,7 @@ const Order = () => {
                             {/* Girl's Name */}
                             <div className="mb-4">
                                 <label className="block font-semibold">Girl's Name:</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={girlName}
                                     onChange={(e) => setGirlName(e.target.value)}
@@ -195,7 +197,7 @@ const Order = () => {
                             {/* Parent's Name */}
                             <div className="mb-4">
                                 <label className="block font-semibold">Parent's Name:</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={parentName}
                                     onChange={(e) => setParentName(e.target.value)}
@@ -220,7 +222,7 @@ const Order = () => {
                                                 <option key={i} value={cookie}>{cookie}</option>
                                             ))}
                                         </select>
-                                        <input 
+                                        <input
                                             type="number"
                                             value={cookieSelection.numCookies}
                                             onChange={(e) => handleCookieChange(index, 'numCookies', e.target.value)}
@@ -249,7 +251,7 @@ const Order = () => {
                             {/* Pickup Location */}
                             <div className="mb-4">
                                 <label className="block font-semibold">Pickup Location:</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={pickupLocation}
                                     onChange={(e) => setPickupLocation(e.target.value)}
@@ -261,7 +263,7 @@ const Order = () => {
                             {/* Contact Method */}
                             <div className="mb-4">
                                 <label className="block font-semibold">How do you wish to be contacted?</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={contactMethod}
                                     onChange={(e) => setContactMethod(e.target.value)}
@@ -274,7 +276,7 @@ const Order = () => {
                             <div className="mb-4">
                                 <label className="block font-semibold">I understand that I will be financially responsible for these cookies:</label>
                                 <div className="flex items-center">
-                                    <input 
+                                    <input
                                         type="radio"
                                         name="responsibility"
                                         checked={acceptedResponsibility}
@@ -287,8 +289,8 @@ const Order = () => {
                             </div>
 
                             {/* Submit Button */}
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 className={`w-full text-white p-2 rounded transition ${acceptedResponsibility ? 'bg-green-500 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
                                 disabled={!acceptedResponsibility}
                             >

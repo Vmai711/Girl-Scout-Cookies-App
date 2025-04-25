@@ -32,7 +32,7 @@ const OrderManagement = () => {
         const userSnap = await getDoc(userDocRef);
 
         if (userSnap.exists()) {
-          const currentRole = userSnap.data().currentRole;  
+          const currentRole = userSnap.data().currentRole;
           let orderList = [];
 
           if (currentRole === "parent-scout") {
@@ -59,12 +59,12 @@ const OrderManagement = () => {
     const start = startDate ? new Date(startDate) : null;
     const end = endDate ? new Date(endDate) : null;
     if (end) end.setHours(23, 59, 59, 999);
-  
+
     const filtered = orders
       .filter((order) => {
         if (!order.timestamp) return false;
         const orderDate = new Date(order.timestamp.toDate());
-  
+
         if (start && end) {
           return orderDate >= start && orderDate <= end;
         } else if (start) {
@@ -78,16 +78,18 @@ const OrderManagement = () => {
         if (!filterStatus) return true;
         return order.orderStatus === filterStatus;
       });
-  
+
     setFilteredOrders(filtered);
   }, [startDate, endDate, filterStatus, orders]);
-  
+
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar page={"order-management"}/>
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Order Management"} />
+        <div className="ml-20 md:ml-0">
+          <Header page={"Order Management"} />
+        </div>
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
           <div className="bg-white p-6 rounded-md shadow-md">
             <h1 className="text-3xl font-bold mb-6 text-center">Order Management</h1>

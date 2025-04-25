@@ -137,29 +137,29 @@ const Dashboard = () => {
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
-  
+
     receipts.forEach(({ girlName, parentName, numberOfBoxesSold, timestamp }) => {
       if (!timestamp || !timestamp.seconds) return;
-  
+
       const date = new Date(timestamp.seconds * 1000);
       const receiptMonth = date.getMonth() + 1;
       const receiptYear = date.getFullYear();
-  
+
       const matchesFilter = showAllYear
         ? receiptYear === currentYear
         : receiptYear === currentYear && receiptMonth === currentMonth;
-  
+
       if (matchesFilter) {
         const identifier = `${girlName || "Unknown"} (${parentName || "Unknown"})`;
         salesMap[identifier] = (salesMap[identifier] || 0) + Number(numberOfBoxesSold || 0);
       }
     });
-  
+
     return Object.entries(salesMap)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([identifier, total]) => {
-        const girlName = identifier.split(" (")[0]; 
+        const girlName = identifier.split(" (")[0];
         return { girlName, total };
       });
   };
@@ -174,7 +174,9 @@ const Dashboard = () => {
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar page={"dashboard"} />
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Dashboard"} />
+        <div className="ml-20 md:ml-0">
+          <Header page={"Dashboard"} />
+        </div>
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
           {/* Cookies Sold Graph */}
           <div className="bg-white p-6 rounded-md shadow-md mb-8">

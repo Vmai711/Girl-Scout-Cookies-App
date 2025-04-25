@@ -51,7 +51,7 @@ const SideBar = ({ page }) => {
       {/* Toggle button on mobile */}
       <button
         type="button"
-        className="fixed top-4 left-4 z-50 p-2 focus:outline-none md:hidden"
+        className="fixed top-2 left-6 z-50 p-2 focus:outline-none md:hidden"
         onClick={() => setCollapsed(!collapsed)}
         aria-label="Toggle sidebar"
       >

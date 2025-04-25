@@ -55,7 +55,9 @@ const Reservations = () => {
     <div className="bg-custom-light-gray flex min-h-screen">
       <SideBar page={"reservations"}/>
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Reservations"} />
+        <div className="ml-20 md:ml-0">
+          <Header page={"Reservations"} />
+        </div>
         <main className="mt-[3.5rem] p-8 bg-gray-100 min-h-screen">
           <div className="bg-white p-6 rounded-md shadow-md">
             <h1 className="text-3xl font-bold mb-6 text-center">Reservations</h1>

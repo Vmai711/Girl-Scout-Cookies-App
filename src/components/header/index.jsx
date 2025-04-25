@@ -14,7 +14,7 @@ const Header = ({ page }) => {
     return (
         <Navbar fluid rounded className='top-1 w-100 justify-right'>
             <Navbar.Brand>
-                <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">{page}</span>
+                <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white ml-auto">{page}</span>
             </Navbar.Brand>
             <div className="flex md:order-2 relative z-50">
                 <div className="relative">

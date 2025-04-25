@@ -20,7 +20,7 @@ export const saveOrder = async (orderData, userId) => {
         });
 
         await addDoc(collection(db, 'messages'), {
-              text: `🆕 New order #${globalOrderRef.id} from ${orderData.parentName || orderData.email}`,
+              text: `New order #${globalOrderRef.id} from ${orderData.parentName || orderData.email}`,
               timestamp: serverTimestamp(),
               uid: userId,
               senderName: orderData.parentName || orderData.email || 'Unknown',

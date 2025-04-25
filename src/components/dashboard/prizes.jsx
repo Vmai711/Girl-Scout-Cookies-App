@@ -17,7 +17,7 @@ const Prizes = () => {
   const [redeemedReward, setRedeemedReward] = useState("");
 
   const [error, setError] = useState("");
-  
+
 
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const Prizes = () => {
         }
       } catch(error){
         console.error("Error fetching Rewards", error);
-        
+
       }
     };
 
@@ -118,23 +118,25 @@ const Prizes = () => {
     }
     updateRewardPoints();
   }, [currentUser, userPoints, spendingPoints, redeemedReward, troopLeaderId])
-    
-  
- 
+
+
+
 
   return (
     <div className="bg-custom-light-gray flex min-h-screen">
-      <SideBar page={"prizes"}/>
+      <SideBar page={"Prizes"}/>
 
       <div className="w-full h-fit sm:ml-64">
-        <Header page={"Awards"}/>
+        <div className="ml-20 md:ml-0">
+          <Header page={"Prizes"} />
+        </div>
         <main className="mt-[3.5rem] p-8">
         <div className="bg-white w-full mx-auto p-6 rounded-md shadow-md">
-          <h1 className="text-3xl font-bold mb-6 text-center">Rewards Page</h1>
+          <h1 className="text-3xl font-bold mb-6 text-center"></h1>
           <p className = "text-2xl font-bold text-center">Your Points: {userPoints}</p>
           <p style = {{textAlign: "center"}}>Manage your reward points.</p>
           <p>{spendingPoints}</p>
-        
+
         <div style = {{display: "grid", gridTemplateColumns: "30% 30% 30%", columnGap: "5%", rowGap: "0%", paddingLeft: "2.5%", paddingRight: "2.5%", paddingTop: "5%"}}>
           {rewards.length > 0 ? rewards.map((reward, index) => (
             <div key = {index} style = {{backgroundColor: 'lightgray', padding: '10px', position: "relative", marginBottom: "15%"}}>
@@ -169,7 +171,7 @@ const Prizes = () => {
             </button>
           </div> */}
 
-        </div>  
+        </div>
         </div>
         </main>
       </div>
