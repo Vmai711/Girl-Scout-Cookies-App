@@ -1,9 +1,30 @@
 import React from "react";
 import { useAuth } from "../../contexts/authContext";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
-const Home = () => {
+const Index = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
+
+  const handleRoleSelection = async (selectedRole) => {
+    if (!currentUser || !selectedRole) return;
+  
+    const userRef = doc(db, "users", currentUser.uid);
+  
+    try {
+      // Add role to array if it doesn't exist
+      await updateDoc(userRef, {
+        role: arrayUnion(selectedRole),
+        currentRole: selectedRole, // set as active role
+      });
+  
+      navigate("/home");
+    } catch (error) {
+      console.error("Error updating role in Firebase:", error);
+    }
+  };
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
@@ -17,83 +38,34 @@ const Home = () => {
           logged in.
         </h1>
         <p className="text-sm text-gray-600 mb-4">
-          This is the Test Home Page. More Stuff will be included.
+          Please select your role using one of the links.
         </p>
         <p className="text-sm text-gray-600 mb-4">Working links:</p>
 
-        <Link
-        to="/parentscout" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
+        {/* Buttons instead of Links to update role */}
+        <button
+          onClick={() => handleRoleSelection("parent/scout")}
+          className="block w-full text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
           Parent/Scout Page
-        </Link>
+        </button>
 
-        <Link
-        to="/cookiemanager" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Cookie Manager Page
-        </Link>
-
-        <Link
-        to="/troopleader" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
+        <button
+          onClick={() => handleRoleSelection("troop-leader")}
+          className="block w-full text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
           Troop Leader Page
-        </Link>
-{/*
-        <Link
-        to="/dashboard" 
-        className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Dashboard Page
-        </Link>
+        </button>
 
-        <Link
-          to="/order-management"
-          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
+        <button
+          onClick={() => handleRoleSelection("cookie-manager")}
+          className="block w-full text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
         >
-          Order Management Page
-        </Link>
-
-        <Link
-          to="/troops"
-          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Troops Page
-        </Link>
-
-        <Link
-          to="/transactions"
-          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Transaction Page
-        </Link>
-
-        <Link
-          to="/cookies"
-          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Cookies Page
-        </Link>
-
-        <Link
-          to="/messages"
-          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Message Page
-        </Link>
-
-        <Link
-          to="/prizes"
-          className="block text-center bg-blue-500 text-white py-3 mb-2 rounded-md shadow hover:bg-blue-600"
-        >
-          Rewards Page
-        </Link>
-*/}
+          Cookie Manager Page
+        </button>
       </div>
     </div>
   );
 };
 
-export default Home;
+export default Index;

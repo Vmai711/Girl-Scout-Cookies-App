@@ -53,8 +53,8 @@ const Login = () => {
     
                 //TODO: This just doesnt work
                 if (userSnap.exists() && userSnap.data().role) {
-                    // User has a role, redirect to home
-                    navigate('/home');
+                    // User has a role, redirect to index
+                    navigate('/index');
                 } else {
                     // User is new or has no role, save basic data & redirect to role selection
                     await setDoc(userRef, {
@@ -75,7 +75,7 @@ const Login = () => {
 
     return (
         <div>
-            {userLoggedIn && (<Navigate to={'/home'} replace={true} />)}
+            {userLoggedIn && (<Navigate to={'/index'} replace={true} />)}
 
             <main className="w-full h-screen flex self-center place-content-center place-items-center">
                 <div className="w-96 text-gray-600 space-y-5 p-4 shadow-xl border rounded-xl">

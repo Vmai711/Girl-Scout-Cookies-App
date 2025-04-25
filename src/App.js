@@ -2,10 +2,8 @@ import Login from "./components/auth/login";
 import Register from "./components/auth/register";
 
 //Home Components
-import Home from "./components/home";
-import ParentScout from "./components/home/parentscout";
-import CookieManager from "./components/home/cookiemanager";
-import TroopLeader from "./components/home/troopleader";
+import Index from "./components/home/index";
+import Home from "./components/home/home";
 
 //Dashboard Components
 import OrderManagement from "./components/dashboard/order_management";
@@ -33,11 +31,9 @@ import { useRoutes } from "react-router-dom";
 function App() {
   const routesArray = [
     { path: "*", element: <Login /> },
-    { path: "/parentscout", element: <ParentScout /> },
-    { path: "/cookiemanager", element: <CookieManager /> },
-    { path: "/troopleader", element: <TroopLeader /> },
     { path: "/login", element: <Login /> },
     { path: "/register", element: <Register /> },
+    { path: "/index", element: <Index /> },
     { path: "/home", element: <Home /> },
     { path: "/dashboard", element: <Dashboard /> },
     { path: "/order-management", element: <OrderManagement /> },
