@@ -135,7 +135,6 @@ const Prizes = () => {
           <h1 className="text-3xl font-bold mb-6 text-center">Rewards</h1>
           <p className = "text-2xl font-bold text-center">Your Points: {userPoints}</p>
           <p style = {{textAlign: "center"}}>Manage your reward points.</p>
-          <p>{spendingPoints}</p>
 
         <div style = {{display: "grid", gridTemplateColumns: "30% 30% 30%", columnGap: "5%", rowGap: "0%", paddingLeft: "2.5%", paddingRight: "2.5%", paddingTop: "5%"}}>
           {rewards.length > 0 ? rewards.map((reward, index) => (
